@@ -378,7 +378,41 @@ draw.io 验证流程：
 
 ## 统一配色
 
+### 方案一：学术配色（默认）
+
+颜色饱和度更高，在论文打印和屏幕阅读中辨识度更好：
+
 ```latex
+% ===== 学术配色（默认） =====
+% 框图主色（边框/填充对）
+\definecolor{acaBlueLine}{HTML}{6080B0}      \definecolor{acaBlueFill}{HTML}{DBEAFE}
+\definecolor{acaGreenLine}{HTML}{30A060}     \definecolor{acaGreenFill}{HTML}{A0D0A0}
+\definecolor{acaOrangeLine}{HTML}{D06020}    \definecolor{acaOrangeFill}{HTML}{FFE6CC}
+\definecolor{acaPurpleLine}{HTML}{6020D0}    \definecolor{acaPurpleFill}{HTML}{E1D5E7}
+\definecolor{acaRedLine}{HTML}{B05050}       \definecolor{acaRedFill}{HTML}{F8CECC}
+\definecolor{acaGreyLine}{HTML}{666666}      \definecolor{acaGreyFill}{HTML}{F5F5F5}
+% 扩展色（draw.io 经典配色中没有的）
+\definecolor{acaGoldLine}{HTML}{D09000}      \definecolor{acaGoldFill}{HTML}{F8F8E0}
+\definecolor{acaTealLine}{HTML}{009060}      \definecolor{acaTealFill}{HTML}{D1FAE5}
+\definecolor{acaCyanLine}{HTML}{00B0D0}      \definecolor{acaCyanFill}{HTML}{E0F7FA}
+\definecolor{acaPinkLine}{HTML}{D06090}      \definecolor{acaPinkFill}{HTML}{FCE4EC}
+\definecolor{acaYellowLine}{HTML}{E0C060}    \definecolor{acaYellowFill}{HTML}{FFF8E1}
+\definecolor{acaLimeLine}{HTML}{80B060}      \definecolor{acaLimeFill}{HTML}{E8F5E9}
+% 区域背景色（zone 用，极浅）
+\definecolor{zoneBlueBg}{HTML}{E0E0F8}
+\definecolor{zoneGreenBg}{HTML}{ECFDF5}
+\definecolor{zonePurpleBg}{HTML}{F5F3FF}
+\definecolor{zoneRedBg}{HTML}{F8E0E0}
+\definecolor{zoneYellowBg}{HTML}{F8F0C0}
+\definecolor{zoneOrangeBg}{HTML}{FFF5EB}
+```
+
+### 方案二：draw.io 经典配色（备选）
+
+适合需要与 draw.io 原生风格保持一致的场景：
+
+```latex
+% ===== draw.io 经典 6 色 =====
 \definecolor{drawBlueFill}{HTML}{DAE8FC}    \definecolor{drawBlueLine}{HTML}{6C8EBF}
 \definecolor{drawGreenFill}{HTML}{D5E8D4}   \definecolor{drawGreenLine}{HTML}{82B366}
 \definecolor{drawOrangeFill}{HTML}{FFE6CC}   \definecolor{drawOrangeLine}{HTML}{D79B00}
@@ -387,7 +421,12 @@ draw.io 验证流程：
 \definecolor{drawGreyFill}{HTML}{F5F5F5}     \definecolor{drawGreyLine}{HTML}{666666}
 ```
 
-语义建议：蓝=通用基础、绿=核心/创新、橙=数据流/传输、紫=决策/验证、红=关键操作、灰=辅助存储。根据领域灵活调整。
+### 配色选择规则
+
+- **默认使用学术配色（方案一）**——颜色饱和度更高，在论文打印和屏幕阅读中辨识度更好
+- 用户明确要求 draw.io 风格时切换到方案二
+- 两套配色的语义映射相同：蓝=通用基础、绿=核心/创新、橙=数据流/传输、紫=决策/验证、红=关键操作、灰=辅助存储
+- 扩展色语义：金=标注/高亮、青绿(teal)=安全/验证、青(cyan)=辅助强调、粉=警告/异常、黄=阶段/步骤、黄绿(lime)=生物/自然
 
 ## TikZ 模板骨架
 
@@ -403,7 +442,26 @@ draw.io 验证流程：
 \setCJKsansfont{PingFang SC}   % ← 同上
 \usetikzlibrary{shapes, arrows.meta, positioning, fit, backgrounds, calc, shadows}
 
-% 色板（见上）
+% ===== 学术配色（默认） =====
+\definecolor{acaBlueLine}{HTML}{6080B0}      \definecolor{acaBlueFill}{HTML}{DBEAFE}
+\definecolor{acaGreenLine}{HTML}{30A060}     \definecolor{acaGreenFill}{HTML}{A0D0A0}
+\definecolor{acaOrangeLine}{HTML}{D06020}    \definecolor{acaOrangeFill}{HTML}{FFE6CC}
+\definecolor{acaPurpleLine}{HTML}{6020D0}    \definecolor{acaPurpleFill}{HTML}{E1D5E7}
+\definecolor{acaRedLine}{HTML}{B05050}       \definecolor{acaRedFill}{HTML}{F8CECC}
+\definecolor{acaGreyLine}{HTML}{666666}      \definecolor{acaGreyFill}{HTML}{F5F5F5}
+\definecolor{acaGoldLine}{HTML}{D09000}      \definecolor{acaGoldFill}{HTML}{F8F8E0}
+\definecolor{acaTealLine}{HTML}{009060}      \definecolor{acaTealFill}{HTML}{D1FAE5}
+\definecolor{acaCyanLine}{HTML}{00B0D0}      \definecolor{acaCyanFill}{HTML}{E0F7FA}
+\definecolor{acaPinkLine}{HTML}{D06090}      \definecolor{acaPinkFill}{HTML}{FCE4EC}
+\definecolor{acaYellowLine}{HTML}{E0C060}    \definecolor{acaYellowFill}{HTML}{FFF8E1}
+\definecolor{acaLimeLine}{HTML}{80B060}      \definecolor{acaLimeFill}{HTML}{E8F5E9}
+% draw.io 兼容别名（指向学术配色）
+\colorlet{drawBlueFill}{acaBlueFill}    \colorlet{drawBlueLine}{acaBlueLine}
+\colorlet{drawGreenFill}{acaGreenFill}  \colorlet{drawGreenLine}{acaGreenLine}
+\colorlet{drawOrangeFill}{acaOrangeFill}\colorlet{drawOrangeLine}{acaOrangeLine}
+\colorlet{drawPurpleFill}{acaPurpleFill}\colorlet{drawPurpleLine}{acaPurpleLine}
+\colorlet{drawRedFill}{acaRedFill}      \colorlet{drawRedLine}{acaRedLine}
+\colorlet{drawGreyFill}{acaGreyFill}    \colorlet{drawGreyLine}{acaGreyLine}
 \pgfdeclarelayer{background}
 \pgfsetlayers{background,main}
 
@@ -415,12 +473,19 @@ draw.io 验证流程：
         minimum height=0.9cm, minimum width=2.8cm,
         inner sep=10pt,                          % 防御：文字不贴框边（原6pt）
         drop shadow={opacity=0.15}, thick},
-    blue_node/.style={base_box, fill=drawBlueFill, draw=drawBlueLine},
-    green_node/.style={base_box, fill=drawGreenFill, draw=drawGreenLine},
-    orange_node/.style={base_box, fill=drawOrangeFill, draw=drawOrangeLine},
-    purple_node/.style={base_box, fill=drawPurpleFill, draw=drawPurpleLine},
-    red_node/.style={base_box, fill=drawRedFill, draw=drawRedLine, font=\footnotesize\bfseries},
-    grey_node/.style={base_box, fill=drawGreyFill, draw=drawGreyLine},
+    blue_node/.style={base_box, fill=acaBlueFill, draw=acaBlueLine},
+    green_node/.style={base_box, fill=acaGreenFill, draw=acaGreenLine},
+    orange_node/.style={base_box, fill=acaOrangeFill, draw=acaOrangeLine},
+    purple_node/.style={base_box, fill=acaPurpleFill, draw=acaPurpleLine},
+    red_node/.style={base_box, fill=acaRedFill, draw=acaRedLine, font=\footnotesize\bfseries},
+    grey_node/.style={base_box, fill=acaGreyFill, draw=acaGreyLine},
+    % 扩展 node styles（学术配色新增）
+    gold_node/.style={base_box, fill=acaGoldFill, draw=acaGoldLine},
+    teal_node/.style={base_box, fill=acaTealFill, draw=acaTealLine},
+    cyan_node/.style={base_box, fill=acaCyanFill, draw=acaCyanLine},
+    pink_node/.style={base_box, fill=acaPinkFill, draw=acaPinkLine},
+    yellow_node/.style={base_box, fill=acaYellowFill, draw=acaYellowLine},
+    lime_node/.style={base_box, fill=acaLimeFill, draw=acaLimeLine},
     arrow/.style={-{Stealth[scale=1.2]}, thick, color=black!70,
         shorten >=2pt, shorten <=1pt},           % 防御：箭头不刺入框内
     tag/.style={font=\scriptsize, fill=white, inner sep=2pt, rounded corners=1pt},
