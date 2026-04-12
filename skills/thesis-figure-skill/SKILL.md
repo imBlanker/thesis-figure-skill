@@ -333,6 +333,11 @@ draw.io 验证流程：
 
 执行顺序（不可调换）：
 1. 加载 `references/review-checklist.md`
+1.5. **参考图对比（如有参考图）**：当用户提供了参考图或要求复刻某张图时，渲染完成后运行：
+```bash
+python3 references/figure-diff.py <reference.png> <replicated.png>
+```
+输出 SSIM 评分（0-1）和 3×3 区域差异热力图。SSIM < 0.85 的区域需要重点修复。脚本同时生成三栏对比图（Reference | Replicated | Diff）辅助人工审查。
 2. **对抗性自审**：假设"一定有问题"，强制找出至少 3 个可改进之处并修复（见上方"强制对抗性自审"）
 3. 修复后重新编译渲染，再按审查清单逐项检查
 4. 视觉审查清单（12 项）+ 设计师视角审查（三遍法）+ 具体检查方向（44 项）+ 六维度评分
@@ -576,6 +581,7 @@ mem_cell/.style={rectangle, draw=drawGreyLine!60, fill=drawGreyFill!50,
 | **所有 TikZ 图（必加载）** | `references/visual-patterns.md` | **9 种可复用的 TikZ 绘制模式：hero 子结构、热力图、折线图、柱状图、特征矩阵、网络图、雷达图、Stage 标签、Pipeline 总结条。每张图必须用 ≥3 种模式** |
 | draw.io 科研展示图 | `references/drawio-modes.md` | 6 种模式（A-F）、视觉花样库、XML 骨架 |
 | 步骤⑤评估打分 | `references/review-checklist.md` | 视觉审查清单、设计师审查、44项检查、评分标准、失败模式路由 |
+| 步骤⑤参考图对比 | `references/figure-diff.py` | SSIM 评分 + 3×3 区域差异 + 三栏对比图。依赖 opencv-python, scikit-image |
 | 任何图表完成后 | `references/experience-log.md` | 读取已有经验 + 追加新发现 |
 | 步骤②同时加载 | `references/evolution.md` | 已验证最佳实践参数（间距、箭头、文字、配色基线值） |
 
