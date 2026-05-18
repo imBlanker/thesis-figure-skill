@@ -150,6 +150,16 @@ def check_word_overlaps(words: list[BBox]) -> list[Issue]:
 
             ox, oy = bbox_overlap(a, b)
             if ox > 0 and oy > 0:
+                # Skip intra-word kerning false positives:
+                # pdfplumber occasionally splits a single tightly-kerned word
+                # (e.g. "Av" in "FedAvg") into adjacent fragments whose bboxes
+                # have <2pt horizontal overlap while sharing >=90% of y-range.
+                # Treat these as a single word, not as colliding labels.
+                y_share = min(a.bottom, b.bottom) - max(a.top, b.top)
+                y_min_h = min(a.height, b.height)
+                if y_min_h > 0 and y_share / y_min_h >= 0.9 and ox < 2.0:
+                    continue
+
                 iou = bbox_iou(a, b)
                 if iou > 0.03:
                     issues.append(Issue(
