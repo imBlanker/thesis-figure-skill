@@ -1,12 +1,23 @@
 #!/usr/bin/env python3
 r"""
-PDF 重叠检测器 — 编译后自动检测渲染结果中的文字重叠问题
-用法: python3 pdf-overlap-checker.py <file.pdf>
+PDF 重叠检测器 — 编译后自动检测渲染结果中的多种几何问题。
 
-基于 pdfplumber 解析 PDF 内部结构，检测：
-  1. 文字-文字重叠：两段文字的 bounding box 有交集
-  2. 文字溢出容器：文字 bbox 超出其所在矩形框的边界
-  3. 文字间距过小：两段文字之间的间隙 < 2pt（即将重叠）
+用法:
+    python3 pdf-overlap-checker.py <file.pdf>            # 人读文本输出
+    python3 pdf-overlap-checker.py <file.pdf> --json     # 结构化输出供 sub-agent 消费
+
+7 类检测（5 基础 + 2 candidate-triage）：
+  基础 5 类（直接 fix）：
+    text-overlap        两段文字 bbox 相交（IoU > 0.03）            [ERROR]
+    text-overflow       文字溢出其容器矩形                          [ERROR/WARN]
+    off-center          容器内容偏离中心 / 顶部留白过多              [WARN]
+    text-line           文字被水平/垂直线穿过                        [WARN]
+    line-crossing       多条 line segment 互相交叉（聚合计数）       [WARN]
+  Candidate 2 类（需 sub-agent triage 区分 ignore/fix）：
+    line-through-node   line 真穿过 filled rect 内部（PyMuPDF 几何） [ERROR, candidate]
+    node-overlap        两个 sibling node rect 几何重叠              [ERROR, candidate]
+
+后两类需 PyMuPDF（pip install pymupdf）。缺失时会打印 ERROR 并退出 — 不静默跳过。
 
 输出: 逐条报告问题，无问题则输出 PASS
 退出码: 0=全部通过, 1=有警告, 2=有错误
@@ -375,6 +386,425 @@ def check_line_crossings(lines: list[BBox]) -> list[Issue]:
     return issues
 
 
+@dataclass
+class Segment:
+    """A line segment with real endpoints (not just a bbox)."""
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+    dashed: bool = False
+    color: tuple = (0, 0, 0)
+    path_id: int = -1  # which PyMuPDF drawing path this segment belongs to
+
+    def length(self) -> float:
+        return ((self.x1 - self.x0) ** 2 + (self.y1 - self.y0) ** 2) ** 0.5
+
+
+def liang_barsky_clip(seg: Segment, rect: BBox) -> tuple[float, float] | None:
+    """Liang-Barsky line-rect clipping. Returns (t_enter, t_exit) in [0,1] or None.
+
+    Coordinate convention: PyMuPDF uses top-left origin, y grows downward.
+    rect.top < rect.bottom (since top=y_min, bottom=y_max in our BBox).
+    """
+    dx = seg.x1 - seg.x0
+    dy = seg.y1 - seg.y0
+    p = [-dx, dx, -dy, dy]
+    q = [seg.x0 - rect.x0, rect.x1 - seg.x0, seg.y0 - rect.top, rect.bottom - seg.y0]
+
+    t_enter, t_exit = 0.0, 1.0
+    for i in range(4):
+        if p[i] == 0:
+            if q[i] < 0:
+                return None  # parallel and outside
+        else:
+            t = q[i] / p[i]
+            if p[i] < 0:
+                t_enter = max(t_enter, t)
+            else:
+                t_exit = min(t_exit, t)
+    if t_enter > t_exit:
+        return None
+    return t_enter, t_exit
+
+
+def point_on_rect_boundary(x: float, y: float, rect: BBox, tol: float = 1.5) -> bool:
+    """Check if (x, y) sits on rect's edge within tolerance."""
+    on_h = (abs(y - rect.top) <= tol or abs(y - rect.bottom) <= tol) and \
+           (rect.x0 - tol <= x <= rect.x1 + tol)
+    on_v = (abs(x - rect.x0) <= tol or abs(x - rect.x1) <= tol) and \
+           (rect.top - tol <= y <= rect.bottom + tol)
+    return on_h or on_v
+
+
+def point_in_rect(x: float, y: float, rect: BBox, margin: float = -2.0) -> bool:
+    """Check if (x, y) is strictly inside rect (with shrink margin for tolerance)."""
+    return (rect.x0 - margin <= x <= rect.x1 + margin and
+            rect.top - margin <= y <= rect.bottom + margin)
+
+
+def check_line_through_nodes(
+    segments: list[Segment],
+    rects: list[BBox],
+    rect_path_ids: list[int] | None = None,
+) -> list[Issue]:
+    """Detect lines whose interior passes through a filled rectangle node.
+
+    Logic:
+      For each segment AB and each candidate node rect R:
+        - Skip if segment came from the same PyMuPDF path that produced R
+          (a node's outline segments trivially "cross" its own bbox).
+        - Clip AB against R via Liang-Barsky.
+        - If both endpoints of AB are outside R and the clipped interval
+          [t_in, t_out] has t_in > 0.05 and t_out < 0.95 (i.e. line crosses
+          the interior, not just touching at endpoints) → flag.
+
+    Filters:
+      - Skip large rects (page-level zones): width > 140 OR height > 90.
+      - Skip tiny rects (decorations): width < 6 OR height < 6.
+      - Skip very short segments: length < 15pt (likely box borders themselves).
+      - Cluster suppression: if a rect is crossed by 4+ distinct segments,
+        it's likely a convergence node — drop the cluster.
+    """
+    if rect_path_ids is None:
+        rect_path_ids = [-1] * len(rects)
+    raw_hits = []     # collect first, cluster-filter second
+    flagged = set()
+
+    # A "node" rect must be plausibly box-shaped *and* small enough that a line
+    # passing through its interior is suspicious.  Zone backgrounds (large
+    # filled rectangles that hold multiple nodes) are intentionally crossed by
+    # internal connections, so we must exclude them or the detector explodes.
+    MAX_W = 140      # ~5cm — anything wider is a zone, not a node
+    MAX_H = 90       # ~3cm
+    MAX_AREA = 12500 # pt² — full 140×90 box allowed. Hero boxes commonly
+                     # reach 4.4cm × 2.2cm (=7750pt²) so the prior 7500 cap
+                     # silently excluded Pedersen-sized heroes (fig97 bug).
+    MIN_DIM = 6      # below this is decoration / glyph artifact
+
+    candidate_rects = [
+        (ri, r) for ri, r in enumerate(rects)
+        if MIN_DIM <= r.width <= MAX_W
+        and MIN_DIM <= r.height <= MAX_H
+        and r.width * r.height <= MAX_AREA
+    ]
+
+    for seg in segments:
+        if seg.length() < 15:
+            continue
+        for ri, rect in candidate_rects:
+            both_inside = False  # explicit init so the bypass check below is robust
+            # Skip "node's own outline segment crosses its own bbox" false positives.
+            if seg.path_id >= 0 and rect_path_ids[ri] == seg.path_id:
+                continue
+            # Endpoint-on-boundary handling: an arrow that terminates at a
+            # node's edge is *usually* a clean incoming connection — but NOT
+            # if its stem also travels through the node's interior on the way
+            # to that edge.  fig97 (Batch 10) hit this: an L-bend ((A.south) |-
+            # (B.west)) where A's x sat inside B's x range routes the
+            # horizontal leg *through* B's interior before landing on B.west.
+            # So we only auto-skip when the endpoint approaches from outside.
+            ep0_on_boundary = point_on_rect_boundary(seg.x0, seg.y0, rect)
+            ep1_on_boundary = point_on_rect_boundary(seg.x1, seg.y1, rect)
+            if ep0_on_boundary and ep1_on_boundary:
+                # Both endpoints on boundary — could be either:
+                #  (a) the rect's own stroke edge (top/bottom/left/right line),
+                #      drawn by a separate "stroke" path even when fill came
+                #      from another path → SKIP these.
+                #  (b) a spanning chord through the node interior — true bug.
+                # Distinguish: check if seg lies along one of the 4 edges.
+                tol = 2.0
+                on_top    = abs(seg.y0 - rect.top)    <= tol and abs(seg.y1 - rect.top)    <= tol
+                on_bot    = abs(seg.y0 - rect.bottom) <= tol and abs(seg.y1 - rect.bottom) <= tol
+                on_left   = abs(seg.x0 - rect.x0)     <= tol and abs(seg.x1 - rect.x0)     <= tol
+                on_right  = abs(seg.x0 - rect.x1)     <= tol and abs(seg.x1 - rect.x1)     <= tol
+                if on_top or on_bot or on_left or on_right:
+                    continue  # rect's own edge
+                # Not on an edge → spanning chord through interior → flag.
+            elif ep0_on_boundary or ep1_on_boundary:
+                # Check whether the *other* endpoint is outside the rect.
+                # If yes AND the line's interior dwell-fraction is large,
+                # the line is routing through the body to reach the edge.
+                other_x = seg.x1 if ep0_on_boundary else seg.x0
+                other_y = seg.y1 if ep0_on_boundary else seg.y0
+                if point_in_rect(other_x, other_y, rect, margin=-3):
+                    # Other endpoint inside → not a "pass through" case;
+                    # it's a connection between an external point and an
+                    # internal anchor.  Skip.
+                    continue
+                # Other endpoint outside: compute how much of the segment
+                # actually lies *inside* the rect.  If > 30% of length, this
+                # is the |- pierce bug; flag it.  Otherwise it's a normal
+                # connection just touching the boundary at endpoint.
+                clip_chk = liang_barsky_clip(seg, rect)
+                if clip_chk is None:
+                    continue
+                inside_frac = clip_chk[1] - clip_chk[0]
+                if inside_frac < 0.3:
+                    continue
+                # Fall through to the rest of the checks (which will re-clip
+                # and emit the issue).
+            else:
+                ep0_inside = point_in_rect(seg.x0, seg.y0, rect, margin=-3)
+                ep1_inside = point_in_rect(seg.x1, seg.y1, rect, margin=-3)
+                if ep0_inside and ep1_inside:
+                    # BOTH endpoints inside the rect — this is the `|-` /
+                    # `-|` pierce pattern (fig97 Batch 10):
+                    #   \draw[arrow] (A.south) |- (B.west)
+                    # generates a short horizontal segment fully *inside* B,
+                    # running from (A.x, B.cy) to (B.cx_inner, B.cy).
+                    # Flag it as a line-through-node bug.  Spine filter above
+                    # already excluded "long axis lines on rect's centerline"
+                    # legitimate cases (lifelines).
+                    both_inside = True  # used below to bypass t_in/t_out check
+                else:
+                    both_inside = False
+                    if ep0_inside or ep1_inside:
+                        # One inside, one outside — line crosses the boundary
+                        # somewhere in the middle.  Skip: this is the normal
+                        # "anchor=center" / "label points inward" case.
+                        continue
+            # Spine filter: a vertical line on the rect's vertical centerline
+            # (±3pt) and much longer than the rect's height is a designed
+            # "spine" — e.g. a sequence-diagram lifeline passing through its
+            # actor header box, or a swimlane axis crossing a phase label.
+            # Same for horizontal lines on the rect's horizontal centerline.
+            is_vertical = abs(seg.x1 - seg.x0) < 1.0
+            is_horizontal = abs(seg.y1 - seg.y0) < 1.0
+            rect_cx = (rect.x0 + rect.x1) / 2
+            rect_cy = (rect.top + rect.bottom) / 2
+            if is_vertical and abs(seg.x0 - rect_cx) <= 3 \
+                    and seg.length() > rect.height * 3:
+                continue
+            if is_horizontal and abs(seg.y0 - rect_cy) <= 3 \
+                    and seg.length() > rect.width * 3:
+                continue
+            clip = liang_barsky_clip(seg, rect)
+            if clip is None:
+                continue
+            t_in, t_out = clip
+            # Require crossing to be "through" — not just glancing edge.
+            # Two exceptions:
+            #   (a) endpoint-on-boundary case: t_in (or t_out) is legitimately
+            #       0 (or 1).  Boundary filter above already gated this.
+            #   (b) both-endpoints-inside case: t_in=0 and t_out=1 always —
+            #       the segment lives entirely inside the rect.  This is the
+            #       fig97 |- pierce bug; allow it through.
+            ep_on_boundary = (ep0_on_boundary or ep1_on_boundary)
+            bypass_through_check = ep_on_boundary or both_inside
+            if not bypass_through_check:
+                if t_in <= 0.05 or t_out >= 0.95:
+                    continue
+            crossing_length = (t_out - t_in) * seg.length()
+            if crossing_length < 3:  # very short crossing — likely numerical noise
+                continue
+            key = (round(seg.x0), round(seg.y0), round(seg.x1), round(seg.y1), ri)
+            if key in flagged:
+                continue
+            flagged.add(key)
+            dash_tag = "dashed " if seg.dashed else ""
+            raw_hits.append((ri, Issue(
+                level="ERROR",
+                category="line-through-node",
+                message=f"{dash_tag}线穿过节点: 从({seg.x0:.0f},{seg.y0:.0f})→"
+                        f"({seg.x1:.0f},{seg.y1:.0f}) 穿过 "
+                        f"rect[{rect.x0:.0f},{rect.top:.0f},{rect.x1:.0f},{rect.bottom:.0f}] "
+                        f"内部 (crossing {crossing_length:.0f}pt)"
+            )))
+
+    # Cluster suppression: if a single rect is crossed by ≥4 distinct segments,
+    # it is almost certainly a convergence node (e.g. CA3/CA1 pyramidal neuron
+    # in a hippocampal network) or a misclassified zone — drop all hits on it.
+    # Real "line accidentally crossing a node" bugs hit 1-3 segments per rect.
+    CLUSTER_THRESHOLD = 4
+    hits_per_rect: dict[int, int] = {}
+    for ri, _ in raw_hits:
+        hits_per_rect[ri] = hits_per_rect.get(ri, 0) + 1
+    return [iss for ri, iss in raw_hits if hits_per_rect[ri] < CLUSTER_THRESHOLD]
+
+
+def check_node_overlap(
+    rects: list[BBox],
+    rect_path_ids: list[int] | None = None,
+) -> list[Issue]:
+    """Detect pairs of node-sized rects that geometrically overlap (sibling
+    overlap, not parent-child containment).
+
+    Filters:
+      - Both rects must be node-sized (6-140pt × 6-90pt).
+      - Skip pairs from the same drawing path (same node).
+      - Skip pairs where one fully contains the other (zone-in-zone, panel
+        holding a child node).
+      - Require IoU ≥ 0.05 — micro overlaps from bbox synthesis are noise.
+    """
+    if rect_path_ids is None:
+        rect_path_ids = [-1] * len(rects)
+    issues = []
+    # Tighter min dim than line-through-node check: glyph fills are 4-8pt and
+    # would generate spurious overlaps. A real node is at least ~10pt on its
+    # short side. Y-fork junction dots (~4-5pt) are intentionally excluded —
+    # overlap detection at that scale is noise.
+    MIN_DIM, MAX_W, MAX_H = 10, 140, 90
+    MIN_IOU = 0.05
+
+    nodes = [
+        (i, r, rect_path_ids[i])
+        for i, r in enumerate(rects)
+        if MIN_DIM <= r.width <= MAX_W and MIN_DIM <= r.height <= MAX_H
+    ]
+
+    seen_pairs = set()
+    for i in range(len(nodes)):
+        for j in range(i + 1, len(nodes)):
+            _ri, a, pi = nodes[i]
+            _rj, b, pj = nodes[j]
+            if pi >= 0 and pi == pj:
+                continue  # same drawing path
+            # Skip identical rects (two paths drew the same outline + fill)
+            if abs(a.x0 - b.x0) < 1 and abs(a.x1 - b.x1) < 1 \
+                    and abs(a.top - b.top) < 1 and abs(a.bottom - b.bottom) < 1:
+                continue
+            # Drop-shadow pattern: TikZ `drop shadow` style draws the same box
+            # twice — a grey shadow offset by ~2-3pt + the main fill rect.
+            # Two rects of nearly identical W/H whose centers differ by ≤5pt
+            # in both axes is overwhelmingly drop shadow, not a real overlap.
+            if abs(a.width - b.width) < 3 and abs(a.height - b.height) < 3:
+                a_cx, a_cy = (a.x0 + a.x1) / 2, (a.top + a.bottom) / 2
+                b_cx, b_cy = (b.x0 + b.x1) / 2, (b.top + b.bottom) / 2
+                if abs(a_cx - b_cx) <= 5 and abs(a_cy - b_cy) <= 5 \
+                        and (abs(a_cx - b_cx) > 0.5 or abs(a_cy - b_cy) > 0.5):
+                    continue  # drop shadow twin
+            # Parent-child? one fully inside the other → OK
+            if is_inside(a, b, margin=2) or is_inside(b, a, margin=2):
+                continue
+            iou = bbox_iou(a, b)
+            if iou < MIN_IOU:
+                continue
+            key = (round(a.x0), round(a.top), round(a.x1), round(a.bottom),
+                   round(b.x0), round(b.top), round(b.x1), round(b.bottom))
+            if key in seen_pairs:
+                continue
+            seen_pairs.add(key)
+            ox, oy = bbox_overlap(a, b)
+            issues.append(Issue(
+                level="ERROR",
+                category="node-overlap",
+                message=f"节点重叠: rect[{a.x0:.0f},{a.top:.0f},{a.x1:.0f},{a.bottom:.0f}] "
+                        f"vs rect[{b.x0:.0f},{b.top:.0f},{b.x1:.0f},{b.bottom:.0f}] "
+                        f"IoU={iou:.3f} (重叠 {ox:.1f}×{oy:.1f}pt)"
+            ))
+    return issues
+
+
+def extract_pymupdf_geometry(filepath: str):
+    """Use PyMuPDF to extract real line endpoints + curves + filled rects.
+
+    Returns (segments, curves_as_bboxes, rects_filled, rects_stroke,
+              rects_filled_path_id).  Each Segment carries its own
+              `path_id` so callers can skip self-comparisons (a node's
+              outline segments vs the same node's bbox rect).
+    Falls back to (None, None, None, None, None) if PyMuPDF unavailable.
+    """
+    try:
+        import fitz
+    except ImportError:
+        # LOUD failure — do not silently skip line-through-node + node-overlap.
+        # Sub-agents reading the report would otherwise believe these checks
+        # passed when they were never run.
+        print(
+            "ERROR: pymupdf 未安装。line-through-node + node-overlap 两类检测"
+            "将不会运行。\n"
+            "  安装: pip install pymupdf",
+            file=sys.stderr,
+        )
+        return None, None, None, None, None
+
+    pdf = fitz.open(filepath)
+    if pdf.page_count == 0:
+        return [], [], [], [], []
+    page = pdf[0]
+    drawings = page.get_drawings()
+
+    segments: list[Segment] = []
+    curve_bboxes: list[BBox] = []
+    rects_filled: list[BBox] = []
+    rects_stroke: list[BBox] = []
+
+    # Track which path id each filled rect came from, so check_line_through_nodes
+    # can skip "a path's own segments cross its own bbox" false positives.
+    rects_filled_path_id: list[int] = []  # parallel to rects_filled
+
+    for pid, d in enumerate(drawings):
+        is_dashed = bool(d.get("dashes"))
+        stroke = d.get("color")
+        fill = d.get("fill")
+        # Track this path's overall bbox so we can register a *filled* path
+        # (TikZ-style filled box drawn as 4 line segments) as a node rect.
+        path_xs: list[float] = []
+        path_ys: list[float] = []
+
+        for it in d.get("items", []):
+            op = it[0]
+            if op == "l":
+                p1, p2 = it[1], it[2]
+                segments.append(Segment(
+                    x0=p1.x, y0=p1.y, x1=p2.x, y1=p2.y,
+                    dashed=is_dashed, color=stroke or (0, 0, 0), path_id=pid
+                ))
+                path_xs.extend([p1.x, p2.x])
+                path_ys.extend([p1.y, p2.y])
+            elif op == "c":
+                # Bezier control points: p0, p1, p2, p3
+                pts = [it[1], it[2], it[3], it[4]] if len(it) > 4 else list(it[1:])
+                if pts:
+                    xs = [p.x for p in pts]
+                    ys = [p.y for p in pts]
+                    curve_bboxes.append(BBox(
+                        x0=min(xs), top=min(ys),
+                        x1=max(xs), bottom=max(ys),
+                        label="bezier"
+                    ))
+                    path_xs.extend(xs)
+                    path_ys.extend(ys)
+                    # Also approximate the curve with chord segments for through-node test
+                    if len(pts) >= 2:
+                        for i in range(len(pts) - 1):
+                            segments.append(Segment(
+                                x0=pts[i].x, y0=pts[i].y,
+                                x1=pts[i + 1].x, y1=pts[i + 1].y,
+                                dashed=is_dashed, color=stroke or (0, 0, 0),
+                                path_id=pid
+                            ))
+            elif op == "re":
+                r = it[1]
+                bb = BBox(x0=r.x0, top=r.y0, x1=r.x1, bottom=r.y1, label="rect")
+                if fill is not None:
+                    rects_filled.append(bb)
+                    rects_filled_path_id.append(pid)
+                else:
+                    rects_stroke.append(bb)
+                path_xs.extend([r.x0, r.x1])
+                path_ys.extend([r.y0, r.y1])
+
+        # If the path is filled (fill color set) AND has geometric extent that
+        # *isn't* already captured by a `re` operator above, register it as a
+        # synthesized filled rect (covers the common TikZ case of a node drawn
+        # as 4 lines + fill).
+        if fill is not None and path_xs and path_ys:
+            x0, x1 = min(path_xs), max(path_xs)
+            y0, y1 = min(path_ys), max(path_ys)
+            w, h = x1 - x0, y1 - y0
+            # Skip degenerate (line-shaped) and page-sized fills.
+            if w >= 4 and h >= 4 and not (w > 500 and h > 500):
+                rects_filled.append(BBox(
+                    x0=x0, top=y0, x1=x1, bottom=y1, label="filled-path"
+                ))
+                rects_filled_path_id.append(pid)
+
+    pdf.close()
+    return segments, curve_bboxes, rects_filled, rects_stroke, rects_filled_path_id
+
+
 def validate_pdf(filepath: str) -> list[Issue]:
     """Main validation: extract PDF elements and check for overlaps."""
     try:
@@ -472,23 +902,57 @@ def validate_pdf(filepath: str) -> list[Issue]:
         all_issues.extend(check_line_crossings(pdf_lines))
 
     pdf.close()
+
+    # 6. Line-through-node (PyMuPDF segments + best-available rect set).
+    #
+    # PyMuPDF gives real line endpoints (pdfplumber only gives line bboxes, losing
+    # diagonal direction).  But many TikZ box-shaped nodes are drawn as 4-line
+    # paths rather than `re` operators, so `rects_filled` from PyMuPDF is often
+    # empty.  In that case fall back to pdfplumber's `rects` list (already
+    # extracted above as the `rects` local), which recognizes node-sized
+    # rectangles regardless of how they were drawn.
+    segments, _curves, rects_filled, _rects_stroke, rect_pids = extract_pymupdf_geometry(filepath)
+    if segments is not None:
+        if rects_filled:
+            node_rects = rects_filled
+            node_rect_pids = rect_pids
+        else:
+            node_rects = rects
+            node_rect_pids = [-1] * len(rects)  # pdfplumber rects have no path id
+        if node_rects:
+            all_issues.extend(check_line_through_nodes(segments, node_rects, node_rect_pids))
+            # 7. Node-vs-node geometric overlap (sibling intersection).
+            all_issues.extend(check_node_overlap(node_rects, node_rect_pids))
+
     return all_issues
 
 
 def main():
     if len(sys.argv) < 2:
-        print("用法: python3 pdf-overlap-checker.py <file.pdf>")
+        print("用法: python3 pdf-overlap-checker.py <file.pdf> [--json]")
         sys.exit(1)
 
-    filepath = sys.argv[1]
+    json_mode = "--json" in sys.argv
+    filepath = next(a for a in sys.argv[1:] if not a.startswith("--"))
     issues = validate_pdf(filepath)
+
+    errors = [i for i in issues if i.level == "ERROR"]
+    warns = [i for i in issues if i.level == "WARN"]
+
+    if json_mode:
+        import json
+        out = {
+            "file": filepath,
+            "errors": [{"category": i.category, "message": i.message} for i in errors],
+            "warnings": [{"category": i.category, "message": i.message} for i in warns],
+            "summary": {"error_count": len(errors), "warning_count": len(warns)},
+        }
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        sys.exit(2 if errors else (1 if warns else 0))
 
     if not issues:
         print("✅ PASS — 未发现重叠问题")
         sys.exit(0)
-
-    errors = [i for i in issues if i.level == "ERROR"]
-    warns = [i for i in issues if i.level == "WARN"]
 
     print(f"{'=' * 60}")
     print(f"PDF 重叠检测报告: {filepath}")

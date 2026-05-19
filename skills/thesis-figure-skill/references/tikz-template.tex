@@ -112,6 +112,12 @@
     },
     arrow thick/.style={arrow, line width=1.6pt},    % 主流 / 强调
     arrow thin/.style={arrow, line width=0.6pt},     % 细节 / 次要
+    arrow short/.style={                             % 短箭头（< 1.5cm = 42pt）专用
+        -{Stealth[length=3pt 1.0, width'=0pt 0.5, sep=0pt 0.3]},
+        line width=0.8pt,                            % 比 arrow 细，tip 更紧凑
+        shorten >=1pt, shorten <=0pt,                % shorten 减半，stem 保留
+        color=black!70,
+    },
     residual/.style={                                % 残差/skip 虚线
         -{Stealth[length=4pt 1.2, width'=0pt 0.6]},
         line width=0.9pt,
@@ -126,6 +132,15 @@
         color=black!50,
         shorten >=2pt, shorten <=2pt,
     },
+    fan_stub/.style={                                % 树状分叉的 stub（spine→target）
+        -{Stealth[length=5pt 1.5, width'=0pt 0.6, sep=0pt 0.5]},
+        line width=1.0pt,
+        shorten >=2pt,                               % tip 离 target 框 2pt
+        shorten <=0pt,                               % ⚠️ 起点紧贴 spine——禁止 shorten 制造视觉断裂
+        color=black!70,
+    },
+    fan_stub thin/.style={fan_stub, line width=0.6pt},
+    fan_stub thick/.style={fan_stub, line width=1.6pt},
     tag/.style={font=\scriptsize, fill=white, inner sep=2pt, rounded corners=1pt},
     annot/.style={font=\footnotesize, inner sep=2pt},
     zone/.style={dashed, thick, inner sep=15pt, rounded corners=8pt},
@@ -139,18 +154,28 @@
 %    ✅ \draw[arrow] (A.south) |- (B.west);     % 先下再右
 %    ❌ \draw[arrow] (A.east) -- (3.5,-8) -- (B.west);  % 手动拐点容易撞框边
 %
-% 2. 树状分叉必须用连续路径画主干+横杆，避免断连：
-%    % 主干+横杆一笔画完（无 arrow、无 shorten）
-%    \draw[thick, color=black!70]
-%        (A.south) -- ++(0,-1.5)
-%        -| ++(3,0) coordinate(right_end)
-%        (A.south) ++(0,-1.5) -| ++(-3,0) coordinate(left_end);
-%    % 各分支独立画（带 arrow + shorten）
-%    \draw[arrow] (left_end) -- (B.north);
-%    \draw[arrow] (A.south |- left_end) -- (C.north);
-%    \draw[arrow] (right_end) -- (D.north);
-%    ❌ 不要用多个独立 \draw 画主干+横杆——shorten 会让交叉点出现间隙
-%    ❌ 不要在分叉点用 circle/rectangle 小节点——会出现"空心方块"
+% 2. 树状分叉（spine + N stubs）— 关键：**spine 用普通 \draw（无 shorten）+ stubs 用 fan_stub 样式（shorten <=0pt）**
+%
+%    ✅ 正确写法（spine 连续，stub 起点紧贴 spine）：
+%      % spine 一条线，无 arrow 无 shorten
+%      \draw[line width=1.0pt, color=black!70] (left_x, spine_y) -- (right_x, spine_y);
+%      % 每条 stub 用 fan_stub（shorten <=0pt，起点紧贴 spine 无 gap）
+%      \draw[fan_stub] (stub1_x, spine_y) -- (target1.north);
+%      \draw[fan_stub] (stub2_x, spine_y) -- (target2.north);
+%      \draw[fan_stub] (stub3_x, spine_y) -- (target3.north);
+%
+%    ❌ 错误写法（stub 用 arrow 样式 → shorten <=1pt 造成 spine 和 stub 间 1pt 视觉断裂）：
+%      \draw[arrow] (stub1_x, spine_y) -- (target1.north);  % 起点离 spine 1pt
+%
+%    ❌ 不要在 spine 上放 fill=white 的 sum/junction 圆圈，否则圆圈会**截断** spine
+%      → 用 fill=（spine 同色）或单独把 spine 在圆圈位置打断再画
+%
+%    主干+横杆一笔画完的备选写法（更紧凑但只适合 1 source → 多 target）：
+%      \draw[line width=1.0pt, color=black!70]
+%          (A.south) -- ++(0,-1.5) coordinate(crossbar_mid)
+%          (crossbar_mid) -| (B.north -| crossbar_mid)
+%          (crossbar_mid) -| (C.north -| crossbar_mid);
+%      \draw[fan_stub] (B.north -| crossbar_mid) -- (B.north);  % 用 fan_stub 收尾
 %
 % 3. zone 标题用 label= 避免标题和内容重叠：
 %    \node[zone, label={[font=\small\bfseries, yshift=3pt]above:标题}] ...

@@ -25,11 +25,16 @@
 
 #### 箭头
 
+> **不再调 `Stealth scale`**——2026-05-18 深度调研后已被 `tikz-template.tex` 的 canonical
+> `arrow/.style` 取代。tip 形状通过 `length=⟨dim⟩ ⟨line_width_factor⟩` + `width'` + `bending`
+> library 自动跟随 `line width`。**只调 line width 三档**，禁止手写 `-{Stealth[scale=X]}`。
+> 详见 lessons.md Part 2 的 "[通用] 箭头/连线 — 深度调研后的 canonical 模板"。
+
 | 参数 | 基线值 | 说明 |
 |------|--------|------|
-| Stealth scale（箭身 ≥2cm） | ≤ 1.2 | 大于 1.2 箭头显粗 |
-| Stealth scale（箭身 1-2cm） | ≤ 0.9 | |
-| Stealth scale（箭身 0.5-1cm） | ≤ 0.7 | |
+| line width 选档 — 主流程 | 1.0 pt | canonical `\draw[arrow]` 默认值 |
+| line width 选档 — 强调主线 | 1.6 pt | canonical `\draw[arrow thick]` |
+| line width 选档 — 辅助/dashed | 0.6 pt | canonical `\draw[arrow thin]` / `residual` |
 | 弯折点到目标框距离 | ≥ 1.5cm | rounded corners 吃掉 ~0.6cm |
 | 树状扇出横线到目标框 | ≥ 1.5cm | 太近"刚拐过来就到了" |
 | ⊕/⊗ 小汇合节点两侧间隙 | ≥ 0.4cm | 需要可见箭身 |
@@ -574,6 +579,209 @@
 - **发现日期**：2026-05-18
 
 > Batch 6 元发现"箭头末端 4 轮迭代仍有问题，需要 concrete template" 已被 **2026-05-18 深度调研 resolved** — canonical pattern 落在 `tikz-template.tex`，详见上方 Batch 3 section 的 "[通用] 箭头/连线 — 深度调研后的 canonical 模板" lesson。
+
+#### [Batch 9] 树状分叉 stub 和 spine 之间出现 1pt 视觉断裂
+- **问题/发现 (R3-100 Batch 9, fig86 HiFi-GAN)**：MPD/MSD fan-in spine 上的 stub 用 `\draw[arrow]` 画——canonical `arrow/.style` 含 `shorten <=1pt`，导致 stub 起点离 spine **1pt** gap。300 DPI 下肉眼可见"分叉点处线断了"。用户在 PNG 一眼看出 4-5 张图都有这种断裂模式
+- **根因**：`arrow/.style` 的 `shorten <=1pt` 是为节点 → 节点设计的（让线离 node 边 1pt 不贴边），但 spine → target 的 stub 起点**不是 node**而是 spine 上的精确点，shorten 把它向后挪 → 视觉 gap
+- **解决方案**：`tikz-template.tex` 新加 `fan_stub/.style`：与 `arrow` 同 tip 但 **`shorten <=0pt`**（起点紧贴 spine）
+  ```tex
+  % spine 一条线，无 arrow 无 shorten
+  \draw[line width=1.0pt, color=...] (left_x, y) -- (right_x, y);
+  % 每条 stub 用 fan_stub
+  \draw[fan_stub] (stub_x, y) -- (target.north);
+  ```
+- **避坑要点**：
+  - ❌ 不要 `\draw[arrow] (x, spine_y) -- (target)` — 会有 1pt gap
+  - ❌ 不要在 spine 中点放 `fill=white` 的 sum/junction 圆圈 — 圆圈截断 spine
+  - ❌ 不要用多个独立 `\draw` 画主干+横杆 — 段间 shorten 制造间隙
+- **E3 已加自评新增项**：每个 fan-out / fan-in 必须确认 "stub 起点和 spine **零 gap**" + "junction dot 颜色和 spine **一致** 或不放 dot"
+- **发现日期**：2026-05-19
+
+#### [Batch 8 后续] line-through-node 几何检测（pdf-overlap-checker 升级）
+- **问题/发现 (R3-100 Batch 7+8, 用户复审)**：canonical 箭头模板上线后，箭头末端问题大幅改善；用户复审指出**剩余两类问题**：① 框/文字/线之间**重叠** ② **线穿过路径**（z-order + 路径绕路）。`visual-review-checklist.md` 的 S3 强枚举 + E11 共享 named coord 缓解了一部分，但**几何穿过仍要靠几何检测**——靠自评清单容易漏（fig80 apoptosis 红虚线穿过 3 个调控盒，35/35 自评 Y）
+- **2026-05-19 全网调研 + 升级**：
+  - 评估了 4 类技术路线：PGF graphdrawing (Lua) / libavoid (Inkscape 系) / GraphViz dot+spline-o-matic / PDF post-render bbox 检测
+  - 前 3 项是 **graph-shape figure 才适用**，对我们的复合图（嵌入可视化 + sidebar + 中心 hub）无效
+  - 选了 **post-render 几何检测路线**——升级 `pdf-overlap-checker.py` 加 **2 个新检测**：
+    1. **line-through-node**：line segment 真穿过 filled rect 内部（不只是 bbox 相交）
+       - 加 PyMuPDF 提取**真实 line endpoint**（pdfplumber 只给 bbox，丢失对角线方向）
+       - 把"有 fill 的 path bbox"当作 node rect（TikZ 大量节点是 4-line + fill 而非 `re` 操作符）
+       - **Liang-Barsky parametric clip** 判断 segment 是否真穿过 rect 内部
+       - 4 类 false-positive 过滤：尺寸（6-140pt × 6-90pt 排除 zone）/ 自身 path / cluster suppression (≥4 segments 同 rect 视为收敛节点) / spine filter (line 在 rect 中线 ±3pt 视为 lifeline)
+    2. **node-overlap**：两个 sibling node rect 几何重叠
+       - 严格尺寸（10-140pt × 10-90pt 排除 glyph）
+       - 跳过完全包含关系（parent-child OK）
+       - **drop-shadow filter**（宽高近似 + 中心偏移 ≤5pt → TikZ drop shadow style 双绘）
+       - 跳过同一 drawing path（同节点 outline + fill 复算）
+  - **`--json` flag** 让 sub-agent 结构化消费 `{errors: [...], warnings: [...], summary: ...}`
+- **实测命中**：
+  - **line-through-node**：fig80 cell cycle 4 处全中（apoptosis 红虚线，坐标对得上）；Batch 7 fig62/63 spine filter 后 17→6；fig71/74/77/78 共 0 误报
+  - **node-overlap**：drop-shadow filter 上线后 ex01-10 几乎全 0；剩下的 fig63/fig79/fig69/ex08 都是 1-4 处真问题（panel overflow / 紧密邻接节点）
+- **已知边界**：
+  - 矩阵密集图（heatmap cells 当作 rect）over-fire（ex10 GAT 报 121 处）—— 没办法纯几何分辨"语义 cell" vs "节点 rect"
+  - 收敛节点（fan-in 多线汇聚）会被 cluster filter 误杀真问题，调高阈值又会暴出大量假阳
+  - node-overlap 现在的 drop-shadow filter 假设 shadow 偏移 ≤5pt；如果 TikZ template 改了 shadow offset > 5pt 会出现假阳——记得同步更新 filter
+  - **裁决依赖 sub-agent triage**：把检测结果当 **candidate report** 不是绝对 bug
+- **使用方式**：
+  - 编译后必跑 `python3 references/pdf-overlap-checker.py file.pdf --json > overlap.json`
+  - sub-agent 在视觉自评 ④.5 时读 overlap.json：
+    - `line-through-node` / `node-overlap` 类**逐条 triage**（不是绝对 bug——矩阵 cell、生物收敛节点常误报）
+    - 其它 4 类（text-overlap / text-overflow / off-center / text-line）大概率是真 bug，直接修
+  - 矩阵图、神经网络收敛图等**已知误报易发**的图，可在 prompt 中提醒 sub-agent "ignore line-through-node hits inside heatmap regions"
+- **发现日期**：2026-05-19
+
+---
+
+#### [Batch 13 用户复审 #2] 步骤 ① 跳过 → 排版大块空白（fig126 Tacotron2）
+- **问题/发现 (R3-100 Batch 13, fig126 Tacotron2 用户截图)**：图整体出现大块空白 — Encoder 列内容到 y≈-7 结束，WaveNet 在 y=-11.8 跨左→右整宽，Audio Waveform 在 y=-13.4。**Encoder 列下方 + WaveNet 中段 ≈ 5cm × 6cm 大块空白**。设计师一眼看到的问题，sub-agent 46 项 + Step 0 都没抓到
+- **根因（步骤 ① 跳过 + 不可验证）**：
+  ```
+  grep 'ASCII|草图|10 项|Pre-flight|画图指令' fig126/figure.tex = 0 hits
+  ```
+  sub-agent 加载了 `step1-instructions.md` 但**没有按它要求实际输出 10 项 + ASCII 草图**——直接跳到编码。`step1-instructions.md` 写"必须以文字形式输出"，但 skill **没法验证** sub-agent 是否真的输出了。即使 ④.5 S6 "大块白色空带" 规则在，sub-agent 自评说 "Y, 0 处" 也漏过了
+- **2026-05-21 修复（双锁 + 复杂图支持 narrative）**：
+  - **锁 1：步骤 ① 产物物质化（双形式）**——SKILL.md ① 明文要求 10 项 + 草图**写进 figure.tex 头部注释块**：
+    - 形式 A：ASCII 草图（极简/中等图）
+    - 形式 B：**Narrative 设计文字**（复杂图 / 含 hero 子结构 / 嵌入 viz）—— 每列/每 zone 一段叙述，含 x/y 范围 + 内部子结构 + **预想"哪里可能空白"并写应对**
+  - 复杂图（fig126 Tacotron2 类）**不能用 ASCII**——嵌入热力图/嵌入 mini-viz ASCII 画不出来；设计师真实思考是叙述性空间描述，不是 ASCII 字符画
+  - **锁 2：Step 0 E 段验证**——sub-agent 在 ④.5 Step 0 时**必读 figure.tex 头部**确认有 form A 或 form B 注释块；若两种都没有 → critical blocker 回 ① 重做
+- **设计哲学**：
+  - 从"声明式纪律"（sub-agent 自报"我做了 step ①"）升级到"产物式纪律"（看 figure.tex 头部有设计文档注释 = 证据）。**可验证的纪律 > 不可验证的声明**
+  - **不强制 ASCII** — ASCII 在复杂图上反而是限制（嵌入 viz / hero 子结构画不出来 → 用户反馈：会"影响画图复杂度和创新性"）。Narrative 形式允许复杂图保留设计自由度，同时保留"先想后画"的纪律
+- **发现日期**：2026-05-21
+
+#### [Batch 13 用户反思] 13 batches 加 70+ 规则但 bug 仍在 — meta 层缺失
+- **问题/发现 (R3-100 Batch 13 用户反馈)**：13 batches 累积 46 项 checklist + 13 ⭐ + 7 类几何检测 + 6 canonical styles，每次用户复审仍能找出新模式 bug。**这不是"差几条规则"的问题，是反应式改进的天花板**
+- **5 层根因**（深度诊断）：
+  1. 规则是症状不是原理：sub-agent 不知道 "spine+stub 同色"、"tip 必落 anchor"、"label 间距 ≥0.3cm" 的共同底层是「**视觉连续性**」
+  2. sub-agent 算法式写 TikZ：`spec → 选坐标 → 写 \draw → 编译`，缺"读者眼睛轨迹"视角
+  3. self-eval 乐观偏差：即使写证据仍倾向 Y
+  4. TikZ 自由度爆炸：每箭头 ~20 个独立选择，组合规则不可能覆盖
+  5. text-only model 无 continuous visual feedback：盲写 → 编译 → 改，第一次盲写时埋的 bug 难修
+- **承认现实**：原本 skill 散落 5 处类似"人类化"规则（tikz-global-rules.md 91/115/242/252/262, sequence-diagram.md 29），但**被埋在 specific rules 中没提升为 meta lens**
+- **2026-05-21 修复（meta 层升级）**：
+  - **SKILL.md 顶部加"视觉法则"段**（3 大法则：0.1 秒直觉 / 读者眼睛轨迹 / 删除测试），提升为所有规则之上的 lens
+  - **④.5 加 Step 0：视觉直觉先行**——在 46 项 Y/N 之前必走 4 段证据（3 秒第一印象 / 主线轨迹 / 删除测试 / 审美退步测试）
+  - **visual-review-checklist.md 强制流程同步**
+- **为什么这有用**：把"读者视角"从可选规则提升为强制 step；从机械逐项检查变成**先视觉后机械**。设计逻辑：46 项是细节体检，Step 0 是整体心电图，缺一不可
+- **发现日期**：2026-05-21
+
+#### [Batch 12 用户复审 #3] T7 label 间距太小（fig116 WaveGlow）
+- **问题/发现 (R3-100 Batch 12, fig116 用户截图)**：z_a / z_b bypass labels 与 bypass lines 间距仅 0.02-0.04cm — 视觉上 label "骑在线上"
+  ```latex
+  % bypass line at y = -2.0
+  \coordinate (zb1_l) at (10.5, -2.0);
+  \draw[arrow, ...] (split1.south) -- (zb1_l) -- ... ;
+  % z_b label
+  \node[font=\scriptsize, anchor=south] at (14.0, -1.98) {z_b (unchanged)};
+  %                                              ↑↑↑↑
+  %                                        只比 line 高 0.02cm
+  ```
+- **根因**：之前 T7 只规定 label 必须 `above`/`below`（方向对），**没规定最小间距 ≥ 0.3cm**。sub-agent 写 `anchor=south at (14.0, -1.98)` 自认为 above，技术上对，但 0.02cm 间距 = 视觉上压在线上
+- **2026-05-20 修复**：T7 加最小间距铁律 — label 到 line ≥ 0.3cm（或等效 `yshift=8pt`）。**自评必须报具体数值，禁止印象判断**
+- **正确写法**：
+  ```latex
+  \node[font=\scriptsize, anchor=south, yshift=8pt] at (14.0, -2.0) {z_b (unchanged)};
+  % 或显式
+  \node[font=\scriptsize, anchor=south] at (14.0, -1.7) {z_b (unchanged)};   % line at -2.0, label south at -1.7 → 0.3cm gap
+  ```
+- **发现日期**：2026-05-20
+
+#### [Batch 12 用户复审 #2] tip 撞裸坐标 = "撞墙"视觉（fig118）
+- **问题/发现 (R3-100 Batch 12, fig118 YOLOv8 用户截图)**：3 条 head feed arrows `\draw[arrow] (bu_p3.east) -- (14.5, 0.0);` —— tip 落在裸坐标 `(14.5, 0.0)`（spine 线上的点），不是任何 node。视觉上"箭头指向空气" / "撞 dashed zone border"。fig118 这是 "3 平行 pass-through with shared vertical spine" 模式，不是 fan-in/fan-out — sub-agent 画 spine 当"shared rail" 但 incoming 误用 `\draw[arrow]`
+- **vs fig120 fan-in 不同点**：fig120 是真 N→1 汇合；fig118 是 3→3 平行流共享 visual rail。两者 sub-agent 都犯"incoming 带 tip"错，但触发模式不同
+- **根因（E2 措辞漏洞）**：之前 E2 写"junction 不被 tip 戳"，sub-agent 不把 `(14.5, 0.0)` 当 "junction"（因为只有 1 incoming + 1 outgoing per row，不像"汇合"）
+- **2026-05-20 修复（E2 重写）**：明文铁律 "**`\draw[arrow*]` 的 tip 终点必须是 node.anchor，禁止是裸坐标 / `\coordinate`**" — 不管是不是 junction，只要 tip 撞坐标就 ERROR。三类违规：(a) fan-out junction dot 被戳 / (b) fan-in 汇合点 / (c) spine 中间点
+- **fig118 正确写法**（写进本 lesson 备查）：
+  ```latex
+  % 方案 A（推荐，无 spine）：3 条直接横向箭头
+  \draw[arrow] (bu_p3.east) -- (det_head.west);
+  \draw[arrow] (bu_p4.east) -- (seg_head.west);
+  \draw[arrow] (bu_p5.east) -- (pose_head.west);
+
+  % 方案 B（要保留 shared spine 的视觉象征）：
+  \draw[line width=1pt, color=black!70] (14.5, 0.0) -- (14.5, -9.0);          % spine 仍画
+  \draw[line width=1pt, color=black!70] (bu_p3.east) -- (14.5, 0.0);          % incoming NO tip
+  \draw[line width=1pt, color=black!70] (bu_p4.east) -- (14.5, -4.5);
+  \draw[line width=1pt, color=black!70] (bu_p5.east) -- (14.5, -9.0);
+  \draw[fan_stub] (14.5, 0.0) -- (det_head.west);                             % outgoing 带 tip
+  \draw[fan_stub] (14.5, -4.5) -- (seg_head.west);
+  \draw[fan_stub] (14.5, -9.0) -- (pose_head.west);
+  ```
+- **发现日期**：2026-05-20
+
+#### [Batch 12 用户复审] Fan-in canonical 缺失 + 颜色不一致 + 孤立 legend 点
+- **问题/发现 (R3-100 Batch 12, fig120 CRISPR-Cas9 用户截图)**：
+  1. **Y-junction "><绿尖"** (crRNA + tracrRNA → sgRNA)：两条 incoming 用 `\draw[arrow]` 都带 tip 在汇合点（"><"），且 incoming 蓝色 / outgoing 青色 — 颜色不一致 + 双 tip 对撞
+  2. **fan-out spine 黑 + stub 彩** (DSB → NHEJ/HDR)：spine `color=black!70` 1.4pt vs stub `color=acaPurpleLine/acaGreenLine` 1.2pt → 折角处看上去断 + 颜色突变
+  3. **4 个孤立彩色圆点漂浮**（蓝/橙/灰/红）无 label 无 leader — sub-agent 大概想画 legend 标记但忘了 label
+- **根因（skill 5 处漏洞）**：
+  - **E3 只有 fan-out canonical，没有 fan-in canonical** — sub-agent 不知道 N→1 怎么画，模仿 fan-out 反过来 → 错
+  - **E2 没明文 "incoming 全部 no tip + 同色"** — sub-agent 给 incoming 加 tip
+  - **没规则规定 spine + stub 颜色一致** — sub-agent 选 spine 黑 / stub 彩
+  - **E7 没强制 legend dot 必有 label** — 孤立彩点放任
+  - rounded corners 在 fan-in 折角处也漏（fig120 incoming 用 `++(0,-0.4) -- (combine)` sharp 90°）
+- **2026-05-20 修复（5 处规则）**：
+  - **E2 强化**：incoming 全部 no tip + 与 outgoing 同色（铁律）
+  - **E3 重写**：(a) fan-out canonical + (b) **新增 fan-in canonical** + (c) 颜色铁律全同色 + (d) fan_stub style + (e) spine 中点禁放 white fill + (f) rounded corners 必加
+  - **E7 强化**：legend dot 必紧贴 label < 0.3cm；禁止孤立彩色圆点
+  - **lessons sample code**：fan-out / fan-in 两段 canonical TikZ 代码示例（本 lesson 上方 E3 中）
+- **fan-in canonical 代码（写进 checklist E3 + 此 lesson 备查）**：
+  ```latex
+  % N sources → 1 target，所有 SAME COLOR
+  \draw[line width=1pt, color=C, rounded corners=5pt] (src1.south) -- (src1.south |- Y);
+  \draw[line width=1pt, color=C, rounded corners=5pt] (src2.south) -- (src2.south |- Y);
+  \draw[line width=1pt, color=C] (src1.south |- Y) -- (src2.south |- Y);  % spine
+  \draw[arrow, color=C] (midpoint, Y) -- (target.north);                   % 唯一带 tip
+  ```
+- **发现日期**：2026-05-20
+
+#### [Batch 11 用户复审] residual / 标签位置 / 时序 annotation 三连击
+- **问题/发现 (R3-100 Batch 11, fig101/107/108/110 用户截图)**：
+  1. fig110 末端短箭头（~0.5cm）用 `\draw[arrow, shorten >=6pt]` 而非 `arrow short`，stem 被吃光剩 tip
+  2. fig110 5'/3' label 用 `anchor=left/right` 在 y=0.5 → 与同 y 箭头压字
+  3. fig108 ViT residual rail 离 addnorm1.east 仅 0.4cm → U-bend 形状回路怪
+  4. fig107 MuSig2 B-N compute box 距 P1.x 仅 0.35cm，与 activation bar ±0.225cm 半宽几乎重合
+  5. fig101 ConvNeXt residual 用了 `residual` style 自带 `rounded corners` → U-bend 视觉怪
+- **根因**：
+  - E13 短箭头规则 sub-agent 漏看 — 短距离箭头偶发回退 `arrow` 默认
+  - skill 没规则规定水平箭头 label 必用 `above/below`
+  - E14 只约束 `|-` pierce，没规则约束 residual rail 与 box 的最小间距
+  - skill 没规则规定时序图 annotation box 与 lifeline 间距
+- **2026-05-20 修复（4 处规则）**：
+  - **T7 标签放置规范**：水平箭头 label 必用 `above`/`below` 不用 `left`/`right`
+  - **S10 时序图 annotation 间距**：compute box 距 lifeline ≥ 0.5cm
+  - **E14 扩充 residual rail 间距**：rail 距最近 box 边界 ≥ 0.5cm
+  - **residual aesthetic 指南**（本 lesson 沉淀）：垂直 tap < 1.0cm（避免线下潜过深）；多 residual 共用 rail y（保持平行带）；residual `rounded corners` 默认值不变（5pt 软化），但 tap 长度小时**自动失效不显弧**——不必特意 `sharp corners`
+- **发现日期**：2026-05-20
+
+#### [Batch 10 用户复审 #2] `|-` / `-|` L-bend 穿 hero body + checker MAX_AREA 漏报
+- **问题/发现 (R3-100 Batch 10, fig97 Pedersen Commitment 用户截图)**：`\draw[arrow] (msg.south) |- (ped_hero.west)` 中 msg 的 x 落在 hero box 的 x 范围内，TikZ 把横线**画在 hero 内部**——产生"箭头从 hero 内部出来"的视觉怪象。这种 bug 在 Batch 8/9/10 多次出现但未被 checker 抓到
+- **根因双层**：
+  1. **设计层**：PGF 不做 obstacle-aware routing（[官方手册](https://tikz.dev/base-nodes)），`|-` 只机械地"先垂直再水平"，**不考虑路径上有没有 obstacle**
+  2. **checker 层**：`pdf-overlap-checker.py` 有 3 个 bug：
+     - `MAX_AREA = 7500` 排除了 4.4cm × 2.2cm (=7750pt²) 的 Pedersen hero，hero-sized 节点被跳过
+     - "endpoint inside rect → skip" 误判：`|-` 横线两端**都在 rect 内部**时也被 skip
+     - "endpoint on boundary → skip" 把 stroke path 的 rect 边（top/bottom/left/right line）也算作"穿过"，cluster filter (≥4) 把真 bug 一起 drop
+- **2026-05-19 修复（4 处）**：
+  1. **`pdf-overlap-checker.py`**：(a) `MAX_AREA = 12500` 允许全 140×90 节点；(b) "both endpoints inside" 不再 skip 而是 flag；(c) "both endpoints on boundary" 仅当 seg 不沿 rect 4 条边时 flag
+  2. **`SKILL.md` ③ 加 `|-` L-bend 安全条款**：✅/❌ 代码示例 + 用 named coordinate waypoint 绕开 obstacle
+  3. **`visual-review-checklist.md` 加 E14**：自评每条 `|-`/`-|` source/target 投影是否重叠 + waypoint 数量
+  4. **本 lesson 沉淀**
+- **fig97 验证**：fix 后 checker 正确报 2 处 line-through-node — (62,165)→(39,165) 和 (130,165)→(152,165)，对应 msg/rand 进入 Pedersen 内部的两条横线
+- **发现日期**：2026-05-19
+
+#### [Batch 10 用户反馈] 短箭头 + rounded corners + 最小间距三连击
+- **问题/发现 (R3-100 Batch 10, fig91-95 用户复审)**：canonical `arrow.style` 让短箭头出现"只有头的箭头"（tip 6.5pt + shorten 3pt 吃光 stem）；`rounded corners=5pt` 被 sub-agent 滥用在直线上产生"莫名其妙曲线"；重叠问题仍频繁（layout 时邻接间距没硬约束）
+- **全网调研定位**：
+  - [PGF/TikZ Arrows 官方手册](https://tikz.dev/tikz-arrows)：Stealth tip natural size 按 line width 0.4pt 时匹配 11pt x-height — 我们 1.0pt 线已是 natural 2.5x
+  - [PGF Path Specifications](https://tikz.dev/tikz-paths)：「very short line segments → rounding may cause inadvertent effects」「lines suddenly extend over the other end」直接命中
+  - [Node Overlap Removal (arxiv 2016)](https://arxiv.org/pdf/1608.02653)：业界 best practice 是 layout 时预防而非 detect-then-fix
+- **解决方案（2026-05-19 三处修复）**：
+  1. **`tikz-template.tex` 新加 `arrow short/.style`**：tip 3pt（`length=3pt 1.0`）+ line width 0.8pt + `shorten >=1pt, shorten <=0pt`。专用于 < 1.5cm 的短连接箭头
+  2. **`SKILL.md` ③ canonical 表新增 `arrow short` 行 + "短箭头铁律"段 + "`rounded corners` 使用规则"代码示例**（✅ 多段折线 OK / ❌ 直线禁用）
+  3. **`visual-review-checklist.md` 加 E13**（短箭头形状 + rounded corners 规范）和 **S9**（最小邻接间距强制扫描：同行 ≥ 0.8cm / 跨行 ≥ 0.6cm / text-box ≥ 0.3cm / 线-box ≥ 0.4cm）。计数 41 → 43
+- **发现日期**：2026-05-19
 
 ---
 
