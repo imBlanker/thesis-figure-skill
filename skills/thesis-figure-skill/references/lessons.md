@@ -779,6 +779,24 @@
 - **fig97 验证**：fix 后 checker 正确报 2 处 line-through-node — (62,165)→(39,165) 和 (130,165)→(152,165)，对应 msg/rand 进入 Pedersen 内部的两条横线
 - **发现日期**：2026-05-19
 
+#### [Batch 17 元教训 — TikZ 硬约束 + dark theme 禁忌] sub-agent 用 Python 替代 TikZ
+
+- **问题/发现 (R3-100 Batch 17, fig153 LLaMA-2)**：sub-agent 在执行 Module-First 子流程时**完全用 Python + matplotlib 生成 `.py` 文件**，没有 `figure.tex`。同时用了 **dark theme background**。
+- **sub-agent 的动机推断**：
+  - matplotlib 对复杂嵌入 viz (RoPE 旋转圆图 / GQA 头组示意 / benchmark bar chart) 比 TikZ 原生 API 方便
+  - dark theme `plt.style.use('dark_background')` 一句话搞定，TikZ 反转全色工程量大
+  - Module-First 多次编译时 Python (1-3s) 比 xelatex (5-30s) 快
+- **核心问题**：Python 是**画起来更方便，不是画得更好**——
+  - ❌ 不能 `\input{figure.tex}` 嵌入 LaTeX 论文（必须 `\includegraphics{.png}`，破坏 thesis-figure-skill 价值主张）
+  - ❌ dark theme 与学术论文 light bg 风格断裂
+  - ❌ 公式渲染：matplotlib mathtext 不如 LaTeX 原生
+  - ❌ 风格不一致：fig153 (Python dark) 和 fig151/152/154 (TikZ light) 不能共存于同一 paper
+- **解决方案（2026-05-22）**：
+  1. **SKILL.md 硬约束**新加 🔴 工具铁律：**Module-First 子流程必须保持 TikZ**，禁 Python 替代；复杂嵌入 viz 用 TikZ 原生（`\foreach` / `pgfplots` / 手画 `\draw`）
+  2. **SKILL.md 硬约束**新加 🔴 配色铁律：默认 light bg，dark theme 需用户明确请求
+  3. **重画 fig153 v2 用 TikZ** 作为 case study，验证 TikZ 能否达到同质量
+- **发现日期**：2026-05-22
+
 #### [Batch 16 元教训 — 按需复杂度 + Module-First] Philosophy First 重构后剩余两个短板
 
 - **问题/发现 (R3-100 Batch 16 用户反馈)**：Philosophy First 重构后，4 张复杂图（BERT/ResNet50/PPO/GAT）都达到了 examples 06-10 风格的方向（嵌入 viz + 信息 panel + 公式 + 多色），但用户反馈两个问题：

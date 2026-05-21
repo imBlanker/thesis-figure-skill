@@ -80,6 +80,17 @@ description: |
 
 ## 硬约束（违反必失败）
 
+🔴 **工具铁律：只用 TikZ 或 draw.io，禁止 Python/matplotlib 替代**（2026-05-22 Batch 17 fig153 教训：sub-agent 在执行 Module-First 时用 Python+matplotlib 生成 `.py` 文件 = 完全偏离 thesis-figure-skill 价值主张）：
+- **Module-First 子流程（③.A→③.D）必须保持 TikZ**——即使 matplotlib 画嵌入 viz 更方便
+- **复杂嵌入 viz** 仍用 TikZ 原生（`\foreach` 画 cell / `pgfplots` 包 / `\draw` 手画 patch）
+- **学术论文图嵌入仍是金标准**：`\input{figure.tex}` 比 `\includegraphics{fig.png}` 在公式渲染、矢量缩放、风格统一上都优
+- 仅当用户**明确要求** Python 时才允许 — 默认必 TikZ
+
+🔴 **配色铁律：默认 light background，dark theme 需用户明确请求**：
+- 学术论文标准是 white/light bg；dark theme 与正文风格断裂
+- Philosophy 段"≥5 种 zone tone"指 zone 浅色背景 + box 中饱和度，**不是**整图反转色
+- sub-agent 不要自作主张套 dark theme
+
 ⚠️ **xelatex + `rotate=90` 中文** — 渲染为不可读色块，所有中文标注必须水平
 ⚠️ **`\texttt` 包裹中文** — 报错，纯英文代码才用 `\texttt` / `code_block`
 ⚠️ **ctex 不可用** — 编译前 `kpsewhich ctex.sty`，否则切方案 B（fontspec）
