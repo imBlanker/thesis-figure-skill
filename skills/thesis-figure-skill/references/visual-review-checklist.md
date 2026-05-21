@@ -146,7 +146,13 @@
 
   **(f) 折角必须 `rounded corners=5pt`**——sharp 90° L-bend 视觉粗糙（E6 已规定）
 
-  自评 E3 写："N 处 fan-out/fan-in: 第 X 处 = fan-{out|in} → spine+stubs+trunk 全色 = COLOR ✓ / incoming/outgoing 段数 = a→b ✓ / 仅最终段带 tip ✓ / rounded corners=5pt ✓"。*极简档/无 fan 结构 → "0 处 fan, N/A" 一句过*
+  **🔴 (g) 几何铁律**（2026-05-21 fig137 v3 教训：spine 飞角 + trunk 偏心 + box 不等宽）：
+  - **g1. spine 范围 = stubs 精确范围**：`spine.x_left == leftmost stub.x` AND `spine.x_right == rightmost stub.x`，**禁止 spine 两端伸出 stubs 范围之外**（fig137 v3 spine 17.4-25.4 但 stubs 18.2-24.7 → 两端"飞角"0.7-0.8cm 悬空）
+  - **g2. trunk.x = stubs 中心**：trunk 进入 spine 的 x 必须 = (leftmost stub.x + rightmost stub.x) / 2，**不能跟 source box 中心走**（fig137 v3 trunk x=22 跟 otok 中心走，但 stubs 中心 21.45 → 偏右 0.55cm）。若 source box 中心 ≠ stubs 中心，**移动 source box 到 stubs 中心**（fan-out 通常 source 比 targets 重要，targets 的对齐优先）
+  - **g3. stubs 等距分布**：`stub[i+1].x - stub[i].x` 全相等（误差 < 0.1cm）。**禁止因 box 宽度不等被迫调整 stub 位置**
+  - **g4. 所有 target box 等宽等高**（A3 强制）：取 `max(label_width) + 0.4cm padding` 设为统一 `minimum width`；标签长度差异大（如 `[lang]` vs `hello world ...`）时**缩短长 label**（如改 "hello world" → "text" 或 "[txt]"）OR 全部统一 box 宽度
+
+  自评 E3 写："N 处 fan-out/fan-in: 第 X 处 = fan-{out|in} → spine+stubs+trunk 全色 = COLOR ✓ / incoming/outgoing 段数 = a→b ✓ / 仅最终段带 tip ✓ / rounded corners=5pt ✓ / **几何检查**：spine.x = [leftmost.x, rightmost.x] ✓ / trunk.x = stubs 中心 ✓ / stub 间距均等 ✓ / box 等宽 ✓"。*极简档/无 fan 结构 → "0 处 fan, N/A" 一句过*
 - [ ] **E4** 连线之间不交叉（除非真有 cross 语义）？
 - [ ] **E5** "能直就直"——源/目标 x 或 y 对齐时用直线，不画 L 弯？
 - [ ] **E6** **任何 90° 弯折都用 `rounded corners=5-8pt`** + **虚线 routing 强制 90° 直角，禁用 Bezier 曲线/对角线段**——sharp 90° 看起来粗糙廉价；非 90° 曲线/对角 routing 看起来乱。所有 dashed leader / residual skip / reference 引线**首选 90° L-bend with rounded corners**，不用 `to[bend left/right]` 或自由曲线。fig48 教训：sharp 90°；fig56 教训：dashed STE arc 曲线本可用 90°
