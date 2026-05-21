@@ -77,6 +77,40 @@ TikZ 还是 draw.io，为什么（参考 SKILL.md 的工具能力边界表）。
 
 **复杂图选 form B（Narrative）替代 ASCII**：当图含 hero 子结构、嵌入热力图/曲线/矩阵、≥3 列、≥30 节点时，ASCII 字符无法画出嵌入可视化或复杂空间关系——改用 **form B Narrative 设计文字**（每列/每 zone 写一段空间描述，含 x/y 范围 + 内部子结构 + 留白处理）。完整 form A vs form B 选择规则 + Tacotron2 范例见 **SKILL.md ① 节**（"🔵 form A/B 选择前的先决条件" 块）。Narrative 形式同样写进 figure.tex 头部注释块作为 Step 0 E 段证据。
 
+#### Hero box 内 sub-layer 间距预算（避免 reactive 微调循环）
+
+**2026-05-21 Batch 14 fig137 教训**：Whisper Encoder hero 内 4 sublayer + Decoder hero 内 6 sublayer，sub-agent 设计阶段没算间距，编译后 round 7→8 才发现 S9（box 间距 0.5cm < 0.8cm）+ T7（K,V label 0.18cm < 0.3cm）违反——8 轮 = 1 轮设计 + 7 轮反应式微调。
+
+**铁律**：含 hero 的图，**ASCII/Narrative 阶段必须显式标出 sub-layer 数量 + 总高 + 单层占比**，不要靠后期迭代试错。预算公式：
+
+```
+hero box 内 sub-layer 间距预算
+─────────────────────────────────────────────
+相邻 sub-layer 中心距 ≥ 1.2cm
+  = 单层 box 高 0.4cm + 上下间隔各 0.4cm
+hero 内沿 label 距 box 边 ≥ 0.3cm（T7 铁律）
+嵌入 rail/label 距 hero 外缘 ≥ 0.5cm（E14 残留 rail 规则）
+
+hero 总高 = N × 1.2cm + 上下 padding 0.4cm + 标题 0.5cm
+例：6 sublayer hero → 6×1.2 + 0.4×2 + 0.5 = 8.5cm
+```
+
+**草图阶段就写出**（form A ASCII 注释块里直接标）：
+
+```latex
+% 例（form A 中标注 hero 内部规划）：
+% Decoder hero 总高 8.5cm（6 sublayer × 1.2cm + padding + 标题）：
+%   ├ [Masked Self-Attn]  y=0    box=0.4cm
+%   ├ [Add & Norm]        y=-1.2 box=0.4cm
+%   ├ [Cross-Attention]   y=-2.4 box=0.4cm  ← rail 接入点
+%   ├ [Add & Norm]        y=-3.6 box=0.4cm
+%   ├ [Feed-Forward]      y=-4.8 box=0.4cm
+%   └ [Add & Norm]        y=-6.0 box=0.4cm
+% 整 hero 区间 y=+0.4 至 y=-6.4（含 0.4cm padding）
+```
+
+**只在 hero 子结构 ≥ 3 sublayer 时强制此预算**——单层/双层 hero 间距问题极少。Encoder/Decoder/MoE expert/Multi-Head 等深嵌套结构必算。
+
 ### 10. 可视化嵌入决策（混合图的关键）
 
 逐个模块扫描——这个模块有没有适合用迷你可视化表达的信息？
