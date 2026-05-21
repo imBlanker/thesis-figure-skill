@@ -779,6 +779,27 @@
 - **fig97 验证**：fix 后 checker 正确报 2 处 line-through-node — (62,165)→(39,165) 和 (130,165)→(152,165)，对应 msg/rand 进入 Pedersen 内部的两条横线
 - **发现日期**：2026-05-19
 
+#### [Batch 14 用户反馈] fig137 v2 修一个 bug 引入 5 个 — 白盒规则被黑盒绕过
+
+- **问题/发现 (R3-100 Batch 14, fig137 v2 用户复审)**：
+  v2 修复 v1 的 11×5cm 大空白后，用户在新 PNG 中标出 5 处新问题：
+  1. K/V 入口的"fork dot"：sub-agent 用 **2 条独立 `\draw[arrow]`**（不是 fan-out canonical spine + stubs）从 enc_an2.east 到 ca_k / ca_v；`line width=1.2pt + rounded corners=5pt` 在 90° 折角处渲染成可见 bulge，视觉像 fork dot
+  2. Q 旁紫色方块：`\node[fill=white, inner sep=1pt, font=\scriptsize\bfseries, color=acaPurpleLine] {Q}` 在白背景 PDF 上，fill=white 不可见，紫色粗体单字符把 1pt inner sep 填满 → 视觉是紫色方块（fig120 孤立 dot 教训的变体）
+  3. 紫橙撞车：紫色 `(dec_ca.west) -- (ca_q.east)` 和橙色 `... -- (dec_ca.west)` 两条 incoming arrow tip **都终止在 dec_ca.west 同一 anchor** → 同一像素点不同颜色重叠
+  4. "Multitask Output" 标题离 spine 仅 0.3cm = T7 边界值视觉太紧
+  5. v2 sub-agent 自评 0 blocker 仍漏检全部 5 处
+- **元根因（最深层）**：规则用"if X then must Y"形式，sub-agent **可以"不用 X"绕开 Y**——白盒规则被黑盒绕过：
+  - E3 自评只问"有没有 fan-out canonical 实施"，sub-agent 用 2 条独立 \draw 替代 spine + stub → E3 自评条件未触发
+  - "多 tip 同 anchor 撞车" SKILL 没明文规则 → 规则空白
+  - T7 报"0.3cm ✓"过 → 边界值通过 = 实质失败
+- **解决方案（2026-05-21 fig137 v2 后三处修复）**：
+  1. **`visual-review-checklist.md` E3 加"反绕过铁律"**：grep figure.tex，同一 node.anchor 出现 ≥2 次作为 `\draw[arrow]` 起点 → 必须重写为 canonical（即使是独立写法）
+  2. **`visual-review-checklist.md` 新增 E15** ⭐：同一 anchor 不能被多条 incoming arrow 同时 tip；修复用换 anchor / anchor offset / routing 改道
+  3. **`visual-review-checklist.md` T7 强化**：(a) 视觉默认从 0.3cm 提升到 0.5cm（0.3 是 compile fail 阈值不是视觉安全值）；(b) `fill=white` + 单字符 + bfseries label 警告（inner sep ≥ 3pt OR 不用 bfseries OR 加长 label）
+  4. 总项数 46 → 47；⭐ 13 → 14
+- **fig137 v3 验证预期**：sub-agent 应该写"E15 dec_ca anchor 检查：3 条 incoming（dec_an1.south + Q + Attn out），用了 .west / .north / [yshift=+3pt]dec_ca.west 三个不同 anchor offset 分开" 才能通过
+- **发现日期**：2026-05-21
+
 #### [Batch 14 用户反馈] Step 0 E 段"细线填充"自欺漏检 — fig126 教训再现
 
 - **问题/发现 (R3-100 Batch 14, fig137 Whisper 用户复审)**：

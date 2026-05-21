@@ -26,7 +26,7 @@ description: |
 
 ## 视觉法则（贯穿全 skill，所有规则之上）
 
-**46 项 checklist 是机械验证，但人画图不是机械的。在所有具体规则之前，先内化 3 条 meta 视觉法则——它们是规则的"为什么"，而不是另外的规则。**
+**47 项 checklist 是机械验证，但人画图不是机械的。在所有具体规则之前，先内化 3 条 meta 视觉法则——它们是规则的"为什么"，而不是另外的规则。**
 
 ### 法则 1：**0.1 秒直觉法则**
 
@@ -41,7 +41,7 @@ description: |
 每张图都有一条"读者视线的主线"。**审查时把自己当读者，沿主线从起点走到终点**——任何地方"卡住"（绕弯/混乱/不知道指哪）= blocker。
 - 卡点案例：① fig97 Pedersen 框里出来个箭头 ② fig118 head spine 上 tip 撞坐标 ③ fig120 孤立彩点漂浮
 - 反过来：如果整条主线**一气呵成读完**，即使有些小细节不完美，图整体可用
-- **46 项 Y/N 是"细节体检"，眼睛走一遍是"整体心电图"——缺一不可**
+- **47 项 Y/N 是"细节体检"，眼睛走一遍是"整体心电图"——缺一不可**
 
 ### 法则 3：**删除测试 + 干净 > 塞满**
 
@@ -189,16 +189,16 @@ description: |
 
 | 档位 | 判断（注释块数节点 + 结构信号）| ④.5 自评策略 |
 |---|---|---|
-| **极简档** | ≤15 节点 AND 无 hero AND 无 fan-out AND 无时序生命线 AND 无嵌入 viz | **明确走 18 项**：S1-S7（不跑 S8/S9/S10）+ T1-T6（不跑 T7）+ M1-M7（不跑 M8/M9/M10）+ E3/E9/E13（13 ⭐ 中与极简图有关的 E 类）+ A1-A4（不跑 A5）；**其余 28 项明确标 "N/A, 一句过"** |
-| **中等档** | 15-30 节点 OR 有 hero OR 有 fan-out | 走全 46 项；E3/M6/S10 等若 0 候选写 "0 处, N/A" 一句即过 |
-| **复杂档** | ≥30 节点 OR 嵌入 viz OR 多 hero | 走全 46 项，每项详细证据 |
+| **极简档** | ≤15 节点 AND 无 hero AND 无 fan-out AND 无时序生命线 AND 无嵌入 viz | **明确走 18 项**：S1-S7（不跑 S8/S9/S10）+ T1-T6（不跑 T7）+ M1-M7（不跑 M8/M9/M10）+ E3/E9/E13（14 ⭐ 中与极简图有关的 E 类；不跑 E15 因极简无多 anchor）+ A1-A4（不跑 A5）；**其余 29 项明确标 "N/A, 一句过"** |
+| **中等档** | 15-30 节点 OR 有 hero OR 有 fan-out | 走全 47 项；E3/M6/S10 等若 0 候选写 "0 处, N/A" 一句即过 |
+| **复杂档** | ≥30 节点 OR 嵌入 viz OR 多 hero | 走全 47 项，每项详细证据 |
 
 **典型极简档**：几何示意（Newton/几何/向量）/纯曲线公式图（Bayesian/概率密度）/单链信号流（ConvNeXt block 主链）
 
 **Step 0 与极简档的关系**（避免"是否豁免"歧义）：
 - Step 0 全 5 段（A/B/C/D/E）**对所有档位强制**，不论极简/中等/复杂
 - 极简档的 E 段只需验证 form A（ASCII 注释块）存在 + 可辨认；form B 不适用极简档
-- 极简档豁免的是 46 项 checklist 中的 28 项，**不是 Step 0**
+- 极简档豁免的是 47 项 checklist 中的 29 项，**不是 Step 0**
 
 **豁免铁律**：N/A 是"已知该项对本图不适用"，不是"懒得查"。写一句话说明（如"无 fan-out 结构, E3 N/A"），把节省的注意力集中在真正适用的项。
 
@@ -310,15 +310,15 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 ```
 0. Read 渲染出的 out-1.png + 视觉直觉先行（应用 3 大法则，见下）
 1. Read overlap.json（路径 = .tex 同目录的 overlap.json，步骤 ④ 跑出来的结构化几何检测）
-2. 加载 references/visual-review-checklist.md（46 项强制审查清单）
+2. 加载 references/visual-review-checklist.md（47 项强制审查清单）
 3. 逐项回答 46 个 Y/N：S1-S10（空间）/ T1-T7（文字）/ M1-M10（语义）/ E1-E14（连线精度）/ A1-A5（美学）
    每项必须有一句证据（"我在 PNG 中看到…" 或 "overlap.json 中 N 处 line-through-node 我标为 …"），不允许凭印象
 4. 任一项 N → 列入 blocker → 输出 patch → Edit → 回 ④ 重编译 → 回 0
-5. Step 0 + 全部 46 项 Y → **把图给用户看**（用户终审，AI 视觉有盲区）
+5. Step 0 + 全部 47 项 Y → **把图给用户看**（用户终审，AI 视觉有盲区）
 6. 用户也通过 → 交付
 ```
 
-**Step 0：视觉直觉先行（在 46 项 Y/N 之前必走）**
+**Step 0：视觉直觉先行（在 47 项 Y/N 之前必走）**
 
 把自己当成第一次看这张图的读者，**用 3 大法则扫描整图**，输出 **5** 段证据：
 
@@ -330,9 +330,9 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 | **D. 审美退步测试**（round ≥ 2 时） | 对比上轮 PNG，本轮修了 X bug 但有没有引入新审美问题（对称丢 / 平行断 / 间距不均）？ | 法则 3 |
 | **E. 大块空白扫描 + 步骤①注释核验**（2026-05-21 fig126/fig137 教训）| (1) **图整体扫描有无 > 3cm × 2cm 大块空白**（阈值与 S6 对齐）；**(1a) 客观度量铁律**——必须**写出怀疑空白区的 x/y 范围 + 宽×高**（如"Encoder.east x=7 至 Decoder.west x=18 = 11cm 宽 × 5cm 高"），**禁止抽象判断**"无空白"。fig137 教训：sub-agent 写"无空白，rail 填充"= self-deception，rail 是细线不是面积；**1b 填充判定**：一个区域算"已填充"当且仅当区域内有 ≥1 个 box/text/嵌入 viz/标注块——**细线（rail/leader/dashed/arrow）不算填充**，因为线占面积可忽略。如果只有线穿过 = 仍是空白；**(2) 打开 figure.tex 头部**确认有"Step ① 设计文档"注释块——形式 **A (ASCII 草图) 或 B (Narrative 描述)** 二选一（复杂图用 B）；**(3) 内容最低要求**——form A 含可辨认 ASCII 草图（不只是模板边框）；form B 含至少一处 x/y 范围描述（如 "Encoder x=0-6cm"）。若 (1)/(1a)/(1b) fail OR (2) 两种都没有 OR (3) 注释块为空洞模板 → critical blocker，**修复方向不是改 .tex，而是回 ① 重新规划布局**（如：把两个 hero 拉近 / 中间加内容 / 改为垂直布局） | 法则 3 + 流程纪律 |
 
-**Step 0 任一项 fail = blocker**，列入 patch 列表。**Step 0 通过才开始 Step 3 的 46 项**。
+**Step 0 任一项 fail = blocker**，列入 patch 列表。**Step 0 通过才开始 Step 3 的 47 项**。
 
-**为什么 Step 0 在 46 项之前**：46 项是机械验证（细节体检），容易陷入"逐项 Y / 整体烂"。Step 0 是视觉直觉（整体心电图），强迫 sub-agent **以读者视角看图**而不是 generator 视角。两者缺一不可。
+**为什么 Step 0 在 47 项之前**：47 项是机械验证（细节体检），容易陷入"逐项 Y / 整体烂"。Step 0 是视觉直觉（整体心电图），强迫 sub-agent **以读者视角看图**而不是 generator 视角。两者缺一不可。
 
 **overlap.json 处理**（S8 + E12 配套）：
 - `errors[]` 中的 text-overlap / text-overflow / off-center / text-line **大概率是真 bug**——按坐标定位 PNG，修
@@ -361,7 +361,7 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 
 这 4 条联合预计节省 30-50% 时间，质量不损失。
 
-**高漏检盲区**：checklist 里带 ⭐ 标记的 **13 项**是 R3-100 实测高漏检 — 审查时优先盯，写最详细的证据。详细分组见 `visual-review-checklist.md` 顶部说明。
+**高漏检盲区**：checklist 里带 ⭐ 标记的 **14 项**是 R3-100 实测高漏检 — 审查时优先盯，写最详细的证据。详细分组见 `visual-review-checklist.md` 顶部说明。
 
 **没有轮数上限**。这是和之前最大的区别——之前 max 2 轮意味着"凑合交付"，现在是**只要还有 1 个 blocker 就不能交付**。3 轮、5 轮、8 轮都可以，只要最终的图是完美的。
 
@@ -443,7 +443,7 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 | 步骤③ 决策门 | `references/figure-spec.schema.md`（B 路 spec） |
 | 步骤③ 走 B 路 → 跑 `dot-to-tikz.py` | （脚本，不需 Read） |
 | 步骤③ 走模板/从零 → 用 TikZ | `references/tikz-global-rules.md` + `references/tikz-template.tex` |
-| 步骤④.5 视觉反馈每一轮 | `references/visual-review-checklist.md`（46 项强制清单） |
+| 步骤④.5 视觉反馈每一轮 | `references/visual-review-checklist.md`（47 项强制清单） |
 | 配色需求 | `references/tikz-colors.md` |
 | 分层架构图 | `references/layered-architecture.md` |
 | 时序交互图 | `references/sequence-diagram.md` |

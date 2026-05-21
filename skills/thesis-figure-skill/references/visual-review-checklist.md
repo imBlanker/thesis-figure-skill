@@ -1,4 +1,4 @@
-# 视觉审查强制清单（46 项）
+# 视觉审查强制清单（47 项）
 
 > **何时加载**：步骤 ④.5 视觉反馈循环中每一轮加载本文件。
 > **加载后必须做的事**：Read PNG + Read overlap.json 后**逐项**回答 46 个 Y/N 检查项。
@@ -54,10 +54,10 @@
 
 **心理对抗**：你会有强烈的"差不多就过了"冲动（这是认知疲劳）。**这种冲动出现 = blocker 还在**。强迫自己回答每项，写出证据。
 
-**⭐ 高漏检项**：带 ⭐ 标记的 13 项（**S8 / S9 / S10 / T7 / M8 / M9 / E3 / E7 / E8 / E9 / E12 / E13 / E14**）是 R3-100 用户/主 agent 复审实测，sub-agent 自评 100% 漏过的盲区——**审查时优先盯这 13 项**。注意分组：
+**⭐ 高漏检项**：带 ⭐ 标记的 14 项（**S8 / S9 / S10 / T7 / M8 / M9 / E3 / E7 / E8 / E9 / E12 / E13 / E14 / E15**）是 R3-100 用户/主 agent 复审实测，sub-agent 自评 100% 漏过的盲区——**审查时优先盯这 14 项**。注意分组：
 - **几何工具检测类**（必跑 `pdf-overlap-checker.py --json` 配套）：S8 / E12（node-overlap + line-through-node candidate triage）
 - **间距测量类**（必报具体 cm 数值）：S9 / S10 / T7
-- **fan/连线 canonical 类**（按模板规范）：E3 / E9 / E13 / E14
+- **fan/连线 canonical 类**（按模板规范）：E3 / E9 / E13 / E14 / E15
 - **逻辑/语义类**（视觉对照画图指令）：M8 / M9 / E7 / E8
 
 ## 维度 1：空间 / Spatial（10 项）
@@ -81,11 +81,12 @@
 - [ ] **T4** 任一标签都不被截断——**对每个 text width < 3cm 的标签盒，显式量字符数 vs box width**（中文每字 ~0.4cm，英文每字 ~0.2cm）。fig15 教训："R groups alternate above/below sheet" 在 2.5cm 框里溢出右边界，自评 35/35 Y 漏检。**自评写 "label X (Ncm) in box (Mcm) → fit ✓/✗"**
 - [ ] **T5** 同图内中/英文标签使用一致（不在某处出现孤立的英文标签或反之）？*（纯英文/纯中文图直接 Y）*
 - [ ] **T6** 字体全图统一（无 Computer Modern fallback 出现在中文环境的英文/公式上）？*（T3 编译期 Missing character 检查已覆盖，本项作交叉验证）*
-- [ ] ⭐ **T7** **标签放置规范 + 最小间距**（2026-05-20 Batch 11/12 用户反馈）——
+- [ ] ⭐ **T7** **标签放置规范 + 最小间距 + fill=white 安全用法**（2026-05-20 Batch 11/12 + 2026-05-21 fig137 v2 用户反馈）——
   - **方向**：水平箭头/线段上的标签必须用 `anchor=above`/`below`，**禁止** `anchor=left`/`right`（会落在线 y level 重叠）；垂直线同理用 `anchor=left`/`right`
-  - **最小间距铁律**（fig116 教训）：label 边缘到 line 的距离**必须 ≥ 0.3cm**——`anchor=south at (x, line_y+0.05)` 这种只差 0.05cm 的写法 = 视觉上 label "骑在线上"。正确写法：`anchor=south at (x, line_y+0.3)` 或 `anchor=south, yshift=8pt at (x, line_y)`
-  - **典型 bug 模式**：①`\node[..., right] at (3.0, 0.5) {3'};` 同 y 压字（fig110）；②`\node[..., anchor=south] at (14.0, -1.98) {z_b};` 线在 y=-2.0，间距仅 0.02cm（fig116）
-  - 自评 T7：写"N 个 label：全 above/below ✓ / 每个 label 到对应 line 距离 ≥ 0.3cm ✓"，**禁止印象判断**——必须报具体数值
+  - **最小间距铁律**（fig116 + fig137 v2 教训）：label 边缘到 line 的距离**视觉默认 ≥ 0.5cm**；绝对最低 ≥ 0.3cm（compile fail 阈值，**边界值不安全**）；fig137 v2 "Multitask Output" 标题离 spine 仅 0.3cm = 视觉上太紧。正确写法：`anchor=south at (x, line_y+0.5)` 或 `anchor=south, yshift=14pt at (x, line_y)`
+  - **`fill=white` + 单字符 label 警告**（fig137 v2 "Q" 紫色方块教训）：`\node[fill=white, inner sep=1pt, font=\scriptsize\bfseries, color=PURPLE] {Q}` 在白底 PDF 上，fill=white 不可见，紫色粗体单字符把 inner sep 区域填满 → 看起来像紫色方块漂浮（fig120 类教训变体）。**修复**：(a) 用 `fill=white, inner sep=3pt`（更大 padding） OR (b) 不用 `\bfseries`（normal weight 不会把 inner sep 填满）OR (c) 用更长 label（"Q (Query)" 而非 "Q"）
+  - **典型 bug 模式**：①`\node[..., right] at (3.0, 0.5) {3'};` 同 y 压字（fig110）；②`\node[..., anchor=south] at (14.0, -1.98) {z_b};` 线在 y=-2.0，间距仅 0.02cm（fig116）；③ fig137 v2 单字符紫色 bfseries Q = "紫色方块"
+  - 自评 T7：写"N 个 label：全 above/below ✓ / 每个 label 到对应 line 距离 ≥ 0.5cm ✓ / 0 处 fill=white 单字符 bfseries（或所有此类 label 已加 inner sep ≥ 3pt） ✓"，**禁止印象判断**——必须报具体数值
 
 ## 维度 3：语义 / Semantic（10 项）
 
@@ -100,7 +101,7 @@
 - [ ] ⭐ **M9** **多目标广播（1-to-N message）** 用 fork dot + N 条独立箭头或 N 条独立箭头，**不是**单条双箭头曲线？（`{Stealth}-{Stealth}` 双头**专属于 ↔ 双向**，不可挪用）
 - [ ] **M10** 多步骤被压缩成单一视觉元素时**显式标注** (`{4,5}` / `(2 substeps)` / `∀t` / "(applied at every step)")？不标 = 视觉撒谎
 
-## 维度 4：连线精度 / Edges（14 项）
+## 维度 4：连线精度 / Edges（15 项）
 
 - [ ] **E1** 箭头 tip 真正止于目标框**外侧**（不刺入框内）？默认 `shorten >=6pt`，必要时 `[xshift=-2pt]box.west`
 - [ ] **E2** **`\draw[arrow*]` 的 tip 终点必须是 node.anchor，禁止是裸坐标 / `\coordinate`**——tip 指向空气 = bug。三类违规：
@@ -111,7 +112,11 @@
   **铁律**：(i) **incoming/spine 段全部用 `\draw[line width=...]` 或 `\draw[fan_stub]`（视 stub 起点）**，**禁用 `\draw[arrow]`**；(ii) tip 段终点必须是 `(target_box.anchor)` 形式，不是 `(x,y)` 坐标；(iii) 所有相关段同色
   
   **自评 E2 写**："N 条 `\draw[arrow]`：每条终点 = box.anchor ✓ / 0 条 tip 撞 coordinate ✓"
-- [ ] ⭐ **E3** Fan-out / Fan-in 强制清点 + **stub-spine 视觉连续性 + 颜色一致性**——**逐一列出图中所有 3+ 条线从同一区域散出或 2+ 条线汇入同一目标的位置**（不能跳过"没有"，必须显式写 "0 处" 或 "N 处: ..."）。每处必须：
+- [ ] ⭐ **E3** Fan-out / Fan-in 强制清点 + **stub-spine 视觉连续性 + 颜色一致性**——**逐一列出图中所有 3+ 条线从同一区域散出或 2+ 条线汇入同一目标的位置**（不能跳过"没有"，必须显式写 "0 处" 或 "N 处: ..."）。
+
+  **🔴 反绕过铁律**（2026-05-21 fig137 v2 教训）：**只要有 ≥2 条 `\draw[arrow]` 从同一 source.anchor 出发到不同 targets**（即使写法是两条独立 `\draw`、不是 spine + stub），**仍算 fan-out**，必须重写为 canonical。fig137 v2 sub-agent 用 2 条独立 `\draw[arrow] (enc_an2.east) -- ... -- (ca_k.west)` / `(enc_an2.east) -- ... -- (ca_v.west)` 绕过 E3 自评 → corner 处的 `rounded corners + thick line` 产生可见 bulge 像 fork dot。**判定**：grep figure.tex，如果同一 `node.anchor` 出现 ≥2 次作为 `\draw[arrow]` 起点 → 必须重写。
+
+  每处必须：
 
   **(a) Fan-out canonical（1 source → N targets）**：trunk + spine + N stubs（tree pattern，不是扫帚式）
   ```latex
@@ -156,6 +161,11 @@
   - **L-bend pierce 检查**：逐条扫所有 `\draw[arrow*]` 含 `|-` 或 `-|`：① `(A) |- (B.west/east)`：要求 A.x **不在** B 的 x 范围内；② `(A) -| (B.north/south)`：要求 A.y 不在 B 的 y 范围内。**违反则横/竖线段会穿过 B 的 body**——TikZ 不做 obstacle-aware routing。修复：用 named coordinate waypoint 绕开
   - **Residual rail 间距**：所有 `\draw[residual]` 的 rail（中段平行 lane）**必须距最近的 hero/box 边界 ≥ 0.5cm**——否则 residual 经"右出 0.8cm 再回头"造成视觉 U 型回路（fig108 教训：rail x=17.4 离 addnorm1.east x≈17.0 只 0.4cm 太挤）。修复：把 rail 进一步外移
   - 自评 E14：写"N 条 |-/-| L-bend：M 条满足投影不重叠 ✓；K 条 residual：rail-box 间距均 ≥ 0.5cm ✓"
+- [ ] ⭐ **E15** **同一 anchor 不能被多条 incoming arrow 同时 tip** *（2026-05-21 fig137 v2 教训）*——
+  - **判定**：grep figure.tex，如果同一个 `node.anchor`（如 `dec_ca.west`）作为 ≥2 条不同 `\draw[arrow]` 的**终点**出现 → blocker
+  - **典型违规**：`\draw[arrow, purple] (dec_ca.west) -- (ca_q.east)` 和 `\draw[arrow, orange] ... -- (dec_ca.west)` 两条 incoming tip 都在 `dec_ca.west` → 视觉撞车（不同颜色不同方向的箭头在同一像素点重叠）
+  - **修复**：(a) **换 anchor**——一条用 `.west` 一条用 `.north`/`.south`，让 tip 分开；(b) **加 anchor offset**——`[xshift=-2pt]dec_ca.west` vs `[xshift=+2pt]dec_ca.west`；(c) **改 routing**——把其中一条拉远绕到另一边
+  - 自评 E15 写："N 个 box 有多条 incoming：每个 box 的 anchor/offset 列表 = ... / 0 处同 anchor 撞车 ✓"
 
 ## 维度 5：美学 / Aesthetic（5 项）
 
@@ -235,5 +245,6 @@ Patch plan (single class per round, minimal change):
 | 2026-05-18 | 深度调研（PGF/TikZ 官方 + PlotNeuralNet + arrows.meta + bending lib）：发现 5 个根因 — bending library 没加载 / scale 不该手调 / line width 才是核心 / width' sep 没用 / 业界用粗线默认 tip | tikz-template.tex `arrow/.style` canonical 模板 + E9 简化为"用 canonical 不要手写 Stealth" |
 | 2026-05-19 | R3-100 Batch 8 用户复审：箭头大幅改善后，剩"重叠 + 线穿过路径" — 自评清单逐项 Y 仍漏（fig80 apoptosis 红虚线穿 3 调控盒等） | E12 新增 ⭐（几何级 `pdf-overlap-checker.py --json` line-through-node 检测 + 人工 triage） |
 | 2026-05-19 | R3-100 Batch 9 用户复审：fig86 等 4-5 张图分叉 stub 和 spine 之间有 1pt 视觉断裂 — `\draw[arrow]` 的 `shorten <=1pt` 在 stub 起点制造 gap | E3 强化 + tikz-template.tex 新加 `fan_stub/.style`（`shorten <=0pt`）；spine 中点禁放 `fill=white` 圆圈 |
+| 2026-05-21 | R3-100 Batch 14 fig137 v2 用户复审：(a) Encoder 出来 2 条独立 `\draw[arrow]` 到 K/V，corner 处 rounded bulge 像 fork dot；(b) "Q" label 用 `fill=white + bfseries + 单字` 渲染像紫色方块；(c) 紫色 Q 和橙色 Attn-out 两条 incoming 都 tip 到 `dec_ca.west` 同一 anchor 撞车；(d) "Multitask Output" 标题离 spine 仅 0.3cm 边界值视觉太紧 | (a) E3 加"反绕过铁律"：多 \draw 共起点仍算 fan-out；(b) T7 加 fill=white 单字符 bfseries 警告；(c) **E15 新增**：同 anchor 多 incoming 不可同点；(d) T7 视觉默认从 0.3cm → 0.5cm |
 
 新的用户终审发现的问题，按此格式追加 + 编入主清单。
