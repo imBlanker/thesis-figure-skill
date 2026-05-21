@@ -779,6 +779,31 @@
 - **fig97 验证**：fix 后 checker 正确报 2 处 line-through-node — (62,165)→(39,165) 和 (130,165)→(152,165)，对应 msg/rand 进入 Pedersen 内部的两条横线
 - **发现日期**：2026-05-19
 
+#### [Batch 14 用户反馈] Step 0 E 段"细线填充"自欺漏检 — fig126 教训再现
+
+- **问题/发现 (R3-100 Batch 14, fig137 Whisper 用户复审)**：
+  Encoder zone 右沿 x≈7cm，Decoder zone 左沿 x≈18cm，中间 ~11cm × 5cm 是大空白
+  ——只有一条 orange cross-attention rail + "K, V" 标签穿过。
+  sub-agent 在 ④.5 Step 0 E 段写"无 > 3×2cm 大块空白，Encoder 和 Decoder 之间由
+  cross-attention rail 填充"——**自欺漏检**。
+- **根因**：Step 0 E 段原条款只说"扫描大块空白"，没说**怎么算"已填充"**。
+  sub-agent 把"有一条线穿过" = "已填充" 的 rationalization 顺利过了 self-check。
+  fig126 是赤裸裸空白，fig137 是**伪装填充**——更狡猾，self-check 形式化通过。
+- **解决方案（2026-05-21 三处修复）**：
+  1. **`SKILL.md` Step 0 E 段加 (1a) 客观度量铁律 + (1b) 填充判定**：
+     - (1a) 必须**写出怀疑区 x/y 范围 + 宽×高**（如"x=7-18 = 11cm × 5cm"），
+       禁止抽象判断"无空白"
+     - (1b) "已填充"定义：区域内有 ≥1 个 **box/text/嵌入 viz/标注块**；
+       **细线（rail/leader/dashed/arrow）不算填充**，线占面积可忽略
+     - 修复方向改为：**回 ① 重新规划布局**（拉近 hero / 中间加内容 / 改垂直）——
+       **不是改 .tex**
+  2. **`visual-review-checklist.md` Step 0 E 段同步 (1a)/(1b)**：阻止 sub-agent
+     读 checklist 时漏新条款
+  3. **本 lesson 沉淀**：未来 audit 关注"E 段判定标准是否客观可机械验证"
+- **预期 Batch 15 验证点**：fig137 类布局（两个 hero 远距离 + 单条 rail）应该被
+  Step 0 E blocker 并要求重新规划——不允许"rail 填充"过关
+- **发现日期**：2026-05-21
+
 #### [Batch 10 用户反馈] 短箭头 + rounded corners + 最小间距三连击
 - **问题/发现 (R3-100 Batch 10, fig91-95 用户复审)**：canonical `arrow.style` 让短箭头出现"只有头的箭头"（tip 6.5pt + shorten 3pt 吃光 stem）；`rounded corners=5pt` 被 sub-agent 滥用在直线上产生"莫名其妙曲线"；重叠问题仍频繁（layout 时邻接间距没硬约束）
 - **全网调研定位**：

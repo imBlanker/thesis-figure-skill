@@ -328,7 +328,7 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 | **B. 主线眼睛轨迹** | 找出图中**最重要的那条数据流**，用眼睛沿它从起点走到终点。任何"卡住"位置 = blocker（如 fig97 Pedersen 框里跑出箭头 / fig118 tip 撞坐标 / fig120 孤立彩点） | 法则 2 |
 | **C. 删除测试** | 列出**疑似可删的元素**（孤立装饰 / 多余 leader / 重复 label）。空则一句 "无可删元素" | 法则 3 |
 | **D. 审美退步测试**（round ≥ 2 时） | 对比上轮 PNG，本轮修了 X bug 但有没有引入新审美问题（对称丢 / 平行断 / 间距不均）？ | 法则 3 |
-| **E. 大块空白扫描 + 步骤①注释核验**（2026-05-21 fig126 教训）| (1) **图整体扫描有无 > 3cm × 2cm 大块空白**（阈值与 S6 对齐，避免阈值分叉）（fig126 Encoder 列下方 + WaveNet 横跨全宽 → 左下 5×6cm 空白）；(2) **打开 figure.tex 头部确认有"Step ① 设计文档"注释块**——形式 **A (ASCII 草图) 或 B (Narrative 描述)** 二选一（复杂图用 B）；(3) **内容最低要求**——form A 含可辨认 ASCII 草图（不只是模板边框）；form B 含至少一处 x/y 范围描述（如 "Encoder x=0-6cm"）。若 (1) fail OR (2) 两种都没有 OR (3) 注释块为空洞模板 → critical blocker，回 ① 重做不是直接修 .tex | 法则 3 + 流程纪律 |
+| **E. 大块空白扫描 + 步骤①注释核验**（2026-05-21 fig126/fig137 教训）| (1) **图整体扫描有无 > 3cm × 2cm 大块空白**（阈值与 S6 对齐）；**(1a) 客观度量铁律**——必须**写出怀疑空白区的 x/y 范围 + 宽×高**（如"Encoder.east x=7 至 Decoder.west x=18 = 11cm 宽 × 5cm 高"），**禁止抽象判断**"无空白"。fig137 教训：sub-agent 写"无空白，rail 填充"= self-deception，rail 是细线不是面积；**1b 填充判定**：一个区域算"已填充"当且仅当区域内有 ≥1 个 box/text/嵌入 viz/标注块——**细线（rail/leader/dashed/arrow）不算填充**，因为线占面积可忽略。如果只有线穿过 = 仍是空白；**(2) 打开 figure.tex 头部**确认有"Step ① 设计文档"注释块——形式 **A (ASCII 草图) 或 B (Narrative 描述)** 二选一（复杂图用 B）；**(3) 内容最低要求**——form A 含可辨认 ASCII 草图（不只是模板边框）；form B 含至少一处 x/y 范围描述（如 "Encoder x=0-6cm"）。若 (1)/(1a)/(1b) fail OR (2) 两种都没有 OR (3) 注释块为空洞模板 → critical blocker，**修复方向不是改 .tex，而是回 ① 重新规划布局**（如：把两个 hero 拉近 / 中间加内容 / 改为垂直布局） | 法则 3 + 流程纪律 |
 
 **Step 0 任一项 fail = blocker**，列入 patch 列表。**Step 0 通过才开始 Step 3 的 46 项**。
 
