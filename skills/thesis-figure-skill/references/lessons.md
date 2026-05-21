@@ -779,6 +779,29 @@
 - **fig97 验证**：fix 后 checker 正确报 2 处 line-through-node — (62,165)→(39,165) 和 (130,165)→(152,165)，对应 msg/rand 进入 Pedersen 内部的两条横线
 - **发现日期**：2026-05-19
 
+#### [Batch 15 元教训 — Philosophy First 重构] 47 项防御规则反而抑制了创造力
+
+- **问题/发现 (R3-100 Batch 14/15 用户反馈)**：fig137 经历 v1 (大空白) → v2 (5 bug) → v3 (修 5 bug 但 fan-out 仍丑) 三代迭代，每轮都加新规则补漏洞，但**整体审美和 examples 06-10 的距离越来越远**。用户反馈："新的毛病还是会有"，"现在很少能画出 examples 06-10 那种风格"。
+- **根因（最深层）**：13-15 批演化方向**完全错了**：
+  - 47 项 checklist 是 **defensive 规则**（"不要 X"）—— 没有任何 **prescriptive 设计指导**（"应该 X"）
+  - canonical 模板 + g1-g4 几何 + E15 anchor 等细则把 sub-agent 推向**统计中心的安全默认**（box+arrow only / 3 色单调 / 无嵌入 viz）
+  - 全部规则可通过 = box+arrow figure，**审美天花板被规则地板压低**
+- **全网调研发现**（2026-05-21）：
+  - **Anthropic frontend-design** (277k installs)：42 行打败 800 行；Philosophy first；Naming gravitational pull；Permission for creativity；UNFORGETTABLE question
+  - **PUA skill** (GitHub tanweai/pua)：corporate framing + L1-L4 pressure escalation + ownership mindset
+- **解决方案（2026-05-21 Philosophy First 重构）**：
+  1. **SKILL.md 顶部**新增 Philosophy 段（替代之前的"视觉法则"）：
+     - The UNFORGETTABLE Question（审稿人 5 秒记住什么）
+     - Naming Gravitational Pull（7 个统计中心默认明确列禁）
+     - Permission for Creativity（NeurIPS/ICML investor framing + "Don't hold back"）
+     - 创造空间词汇菜单（嵌入 viz / panel / 公式 / 配色 / 层级 / cross-zone / 学术 polish）
+  2. **visual-review-checklist 精简 47 → 18 项**：保留编译保障 (T1/T3/T4) + 空间灾难 (S1/S6/S8/S9) + 语义 (M1/M2/M3/M8) + 连线 (E1/E2/E3/E9/E12) + 美学 (A1) + **新增 V1** (复杂档应有 ≥1 嵌入 viz/panel)
+  3. **删除最近 5 个 commit 的防御细则**：E3 g1-g4 几何 / E15 同 anchor / T7 0.5cm 强化 / Step 0 E (1a)/(1b) / hero sub-layer 间距预算公式
+  4. **Philosophy + 18 项双重门**：18 项过仅说明无明显 bug，Philosophy 通过才说明审美达标
+- **Batch 16+ 验证预期**：sub-agent 应能在 Philosophy 引导下**主动考虑嵌入 viz/panel/公式嵌入**，不再 box+arrow only
+- **反思**：13-15 批教训的最大价值不是规则本身，而是认识到"defensive 规则越多 → 创造力越少"。**少而精的 Philosophy 比繁多防御更释放潜力**。
+- **发现日期**：2026-05-21
+
 #### [Batch 14 用户反馈] fig137 v2 修一个 bug 引入 5 个 — 白盒规则被黑盒绕过
 
 - **问题/发现 (R3-100 Batch 14, fig137 v2 用户复审)**：
