@@ -779,6 +779,27 @@
 - **fig97 验证**：fix 后 checker 正确报 2 处 line-through-node — (62,165)→(39,165) 和 (130,165)→(152,165)，对应 msg/rand 进入 Pedersen 内部的两条横线
 - **发现日期**：2026-05-19
 
+#### [Batch 18 架构重思考] TikZ Snippet Library — 用乐高积木解决文本范式天花板
+
+- **问题/发现 (R3-100 Batch 17, fig153 v2 TikZ)**：Philosophy First 重构后 sub-agent 把"嵌入 viz / panel / 公式 / 多色"4 个要素都做对了，但用户复审仍说"排版乱 / 大量空白 / 配色有问题"。
+- **核心洞察**：Figure design 本质是 **multi-modal 任务**（visual perception + 结构组合 + 工程实现），当前 skill 是**纯 textual prompt engineering**：
+  - ✅ 文本能做到 "嵌入 ≥ 1 个 viz" / "≥ 5 种 zone 颜色" / "无大空白"
+  - ❌ 文本做不到 "嵌入 viz 看起来要有视觉重量" / "颜色要协调" / "留白要均匀"
+  - **Batch 13-17 实质上在用文本逼近一个本质上需要 visual reference 的任务 = dead-end**
+- **6 个候选方向**（A/B/C/D/E/F），选定 **A: TikZ Snippet Library**——给 sub-agent 高质量乐高积木拼装而不是从零写
+- **解决方案（2026-05-22 Batch 18）**：创建 `references/tikz-snippets/` 含 6 个手工精雕的 TikZ 片段：
+  - `attention-heatmap.tex`（N×N 热力图 + colorbar，硬编码 diagonal-dominant pattern + 紫色渐变）
+  - `bar-chart.tex`（benchmark 柱状图 + grid + 数字标注）
+  - `hyperparams-table.tex`（参数表 + 交替行 fill + bold value）
+  - `multi-zone-palette.tex`（6 色 zone tone 标准模板 + 用色规则）
+  - `pipeline-stages.tex`（N-stage 水平管线 + 自动 arrow 连接）
+  - `formula-box.tex`（公式 box 3 variant：simple / with annotation / multi-line）
+  - 每个 30-80 行 TikZ，独立可编译验证（6/6 PASS）
+- **SKILL.md 改动**：Philosophy 段加"复杂档画图捷径"子段 + 加载索引加 `tikz-snippets/` 路径 + 明令禁简化 snippet 核心结构
+- **预期效果**：sub-agent 在复杂档时**拼装 ≥ 3 个 snippet**（如 pipeline + heatmap + bar chart）—— 视觉重量自动达到 examples 标杆。N×M 组合让多样性保持。
+- **元教训**：当文本范式触天花板，**不要再加规则，而是给 high-quality artifacts (snippets)**。这是 React 组件库思想应用到 TikZ。
+- **发现日期**：2026-05-22
+
 #### [Batch 17 元教训 — TikZ 硬约束 + dark theme 禁忌] sub-agent 用 Python 替代 TikZ
 
 - **问题/发现 (R3-100 Batch 17, fig153 LLaMA-2)**：sub-agent 在执行 Module-First 子流程时**完全用 Python + matplotlib 生成 `.py` 文件**，没有 `figure.tex`。同时用了 **dark theme background**。
@@ -920,3 +941,21 @@
 - **测试协议 / 落盘格式 / 状态追踪 / 主题选择策略**——这些是 test harness 而非 TikZ 知识，不写入
 
 **lessons.md 范围**：TikZ/draw.io 渲染技巧、图层选择、布局规则、参数基线、踩坑教训。专注图本身的视觉/几何质量。
+
+#### [复杂图] - 残差 skip 线必须走 zone 之间的间隙，不能走 zone 内部
+
+- **问题/发现**：Batch 17 fig153 v2：residual skip 连线设定 x=4.25（在 attention subzone 内，zone 左边=4.15），导致竖线穿过 Q/K/V 节点 → `line-through-node` 8 处。
+- **解决方案**：残差 skip 竖线的 x 坐标必须落在 **hero 外框与 subzone 之间的间隙**（如 hero.left=3.8, subzone.left=4.15，则 skip x=3.97，落在间隙 [3.8, 4.15] 中）。同理右侧 skip x 落在 subzone.right 和 hero.right 之间。
+- **发现日期**：2026-05-22
+
+#### [嵌入 viz] - `dashed` zone 边框在 `pdf-overlap-checker` 中会误报 line-through-node
+
+- **问题/发现**：`\draw[dashed] (x0,y0) rectangle (x1,y1)` 的水平边段会穿过 zone 内所有节点，触发 line-through-node。
+- **处理方式**：这是已知语义误报。批量 ignore：`"N 处 line-through-node 全部来自 dashed 子区背景框与其包含节点的几何相交，属于 zone 边界设计而非路由错误"`。
+- **发现日期**：2026-05-22
+
+#### [嵌入 viz] - RoPE / GQA embedded viz 放置坐标需精确预算防 node-overlap
+
+- **问题/发现**：RoPE viz 中心=(4.75,5.2), width=2.8cm → x范围[3.35,6.15]；GQA viz 中心=(7.65,5.2), width=3.0cm → x范围[6.15,9.15]。两个 viz 的 x 范围在 6.15 重合 → node-overlap。
+- **解决方案**：放置 embedded viz 前先算出 (center_x ± half_width) 范围，确保两个 viz 之间间隙 ≥ 0.3cm。
+- **发现日期**：2026-05-22

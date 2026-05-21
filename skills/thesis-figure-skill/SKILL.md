@@ -78,6 +78,21 @@ description: |
 
 **审美 + 信息密度 > 规则合规。** 规则只是地板，审美是天花板。**18 项 checklist 是 catching last-mile bugs**——不是设计指南。设计指南是上面的 Philosophy。
 
+### 复杂档画图捷径 — TikZ Snippet Library
+
+**Batch 17 fig153 教训**：Philosophy 文本指南让 sub-agent **知道要嵌入 viz / panel / 公式**，但**写出来的视觉重量、留白、配色协调仍然失败**——因为这些是 visual perception 而非 textual 任务。
+
+**解决方案**：`references/tikz-snippets/` 提供 6 个手工精雕的 TikZ 片段——sub-agent **复制粘贴 + 替换参数**即可达到 examples 标杆的视觉重量：
+
+- `attention-heatmap.tex` — N×N 热力图 + colorbar（Transformer / GAT / ViT 必用）
+- `bar-chart.tex` — benchmark 柱状图 + grid（含 metrics 时用）
+- `hyperparams-table.tex` — 参数表（含 model spec 时用）
+- `multi-zone-palette.tex` — 6 色 zone tone 标准配色（任何复杂档用）
+- `pipeline-stages.tex` — N-stage 水平管线（主流结构用）
+- `formula-box.tex` — 公式 box 3 种 variant（公式嵌入 box 用）
+
+**复杂档应该考虑用 ≥ 3 个 snippet 拼装**，比从零写更接近 examples 标杆。**绝对不能"简化"snippet 核心结构**——简化 = 信息稀疏 = 平庸。
+
 ## 硬约束（违反必失败）
 
 🔴 **工具铁律：只用 TikZ 或 draw.io，禁止 Python/matplotlib 替代**（2026-05-22 Batch 17 fig153 教训：sub-agent 在执行 Module-First 时用 Python+matplotlib 生成 `.py` 文件 = 完全偏离 thesis-figure-skill 价值主张）：
@@ -462,6 +477,7 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 | 步骤③ 决策门 | `references/figure-spec.schema.md`（B 路 spec） |
 | 步骤③ 走 B 路 → 跑 `dot-to-tikz.py` | （脚本，不需 Read） |
 | 步骤③ 走模板/从零 → 用 TikZ | `references/tikz-global-rules.md` + `references/tikz-template.tex` |
+| **步骤③ 复杂档需嵌入 viz / panel / 公式** | **`references/tikz-snippets/` ⭐ 优先用 snippet 拼装而不是从零写**（含 6 个手工精雕模板：attention-heatmap / bar-chart / hyperparams-table / multi-zone-palette / pipeline-stages / formula-box） |
 | 步骤④.5 视觉反馈每一轮 | `references/visual-review-checklist.md`（18 项强制清单） |
 | 配色需求 | `references/tikz-colors.md` |
 | 分层架构图 | `references/layered-architecture.md` |
