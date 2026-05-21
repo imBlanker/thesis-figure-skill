@@ -146,29 +146,77 @@ description: |
 
 **写在 figure.tex 头部作为注释**，sub-agent 在 ④.5 Step 0 时读取核验。若注释不存在 → blocker 回 ① 重做。**注意**：form B 不是必须填模板，是用"设计师的叙述思维"展开布局——重点是 Philosophy 段的 **UNFORGETTABLE Question**：你怎么布局让审稿人 5 秒记住一个独特结构？
 
-### ①.5 图档判断（创造性免责 + N/A 豁免）
+### ①.5 图档判断（**用户驱动** + 自动检测兜底）
 
-**先判图档**，再走④.5 自评 — 避免极简几何图被规则"过度设计"（Batch 12 fig114 Newton 3 轮答 138 项大半 N/A 的反面教材）。
+**🔴 复杂度按需而定，不是默认复杂**（Batch 16 教训：Philosophy First 让 sub-agent 默认套 examples 06 复杂风格，但用户实际只想要中等清晰图时 = 过度发挥变乱）。
 
-**判档方法**：步骤①注释块写完后，**数注释里出现的节点总数** + 看明显结构信号（hero / fan-out / 嵌入 viz / 时序），对照下表：
+**第 1 步：从用户原 prompt 关键词推断复杂度**
 
-| 档位 | 判断（注释块数节点 + 结构信号）| ④.5 自评策略 |
-|---|---|---|
-| **极简档** | ≤15 节点 AND 无 hero AND 无 fan-out AND 无时序生命线 AND 无嵌入 viz | 18 项中 S8/S9/M8/E3/E12/V1 一句话 N/A；其余按情况答 Y/N |
-| **中等档** | 15-30 节点 OR 有 hero OR 有 fan-out | 走全 18 项；E3/M8 等若 0 候选写 "0 处, N/A" 一句即过 |
-| **复杂档** | ≥30 节点 OR 嵌入 viz OR 多 hero | 走全 18 项，重点 V1（嵌入 viz / 信息 panel） |
+| 用户 prompt 关键词 | 推断档位 |
+|---|---|
+| "详细 / 完整 / 含 benchmark / 发表级 / 总览 / hyperparams / 性能数字" | **复杂档**（按 Philosophy 全套：嵌入 viz + panel + 公式 + 多色）|
+| "概览 / 主架构 / 流程图 / 主流程 / 示意" | **中等档**（清晰主流 + zone，1-2 个嵌入元素）|
+| "几何示意 / 公式对比 / 曲线对比" | **极简档**（单坐标系或纯结构，无 hero / 无 panel） |
 
-**典型极简档**：几何示意（Newton/几何/向量）/纯曲线公式图（Bayesian/概率密度）/单链信号流
+**第 2 步：如果用户原 prompt 不明确 → 主动询问用户**
 
-**Philosophy 对极简档同样适用**：极简不等于平庸——单坐标系也可以有信息密度（多曲线对比 + 数学注释 + 参数标签）。**审美由 Philosophy 主导，不由档位决定**。
+```
+用户原 prompt 没明示复杂度时，使用 AskUserQuestion（或直接询问）：
+
+"这张图你想要哪种复杂度？
+
+(A) 极简：单层主架构 / 几何示意，5 秒理解
+(B) 中等：主流程 + 关键 zone，10 秒理解  
+(C) 复杂：完整含 hyperparameters / benchmark / 公式嵌入，发表级"
+```
+
+**禁止**自作主张选复杂档画出"塞满 panel 的乱图"——**按需才是审美**。
+
+**第 3 步：用户确认后，对照下表执行**
+
+| 档位 | 自动判断备选（用户没说时）| 该档**应该有的元素**（Philosophy 适度展开）| ④.5 自评策略 |
+|---|---|---|---|
+| **极简档** | ≤15 节点 + 无 hero + 无嵌入 viz | 单坐标系 / 纯结构 + 必要标注；**不强加 hero / panel** | 18 项中 S8/S9/M8/E3/E12/V1 一句话 N/A |
+| **中等档** | 15-30 节点 OR 有 hero | 主流 + 2-3 zone + 1-2 嵌入元素（可选）| 走全 18 项；E3/M8 0 候选一句过 |
+| **复杂档** | ≥30 节点 OR 嵌入 viz OR 多 hero | hero 子结构展开 + ≥2 嵌入 viz + ≥1 panel + 公式嵌入 + ≥5 色 zone | 走全 18 项，重点 V1 |
+
+**关键原则**：**极简不等于平庸；复杂不等于必塞**。**审美在 Philosophy（5 秒记住什么）**，密度在档位（按用户需求）。
 
 ### ② 加载专项规则
 确定图表类型后，**按需**加载对应文件（见下方"按需加载索引"）。同时加载 `references/lessons.md` 获取该类型已验证的基线参数和踩坑经验。
 基线参数已经是 25 批次 157 张图的结晶——**直接用，不要从零试错**。要偏离基线必须有具体理由。
 
-### ③ 生成代码（**两层决策门，按顺序匹配**）
+### ③ 生成代码（**Module-First 子流程 + 两层决策门**）
 
-按以下顺序回答"用哪条路径生成"，**第一个 Yes 就走那条**：
+**🔴 复杂档强制 Module-First 子流程**（Batch 16 教训：sub-agent 一次写 800 行 TikZ → 整图乱；先画一部分，验证好，再拼接 = 干净）：
+
+```
+③.A — 先画 hero（最重要的中央子结构 + 嵌入 viz / 关键公式）
+       - 单独输出 figure.tex（只含 hero + 一个极简 frame）
+       - 编译 + 渲染 PNG → 单独审查 hero
+       - hero 内部 sub-layers / 嵌入 viz / 公式都干净后才继续
+       - 不要直接跳到完整图
+
+③.B — 再加主流（管线 + zones 边界 + connecting arrows）
+       - 在 ③.A 的 hero 周围扩展：左右上下的 supporting modules + zone 边框
+       - 编译 + 渲染 → 审查框架是否清晰
+       - canonical fan-out / fan-in 在此阶段引入
+
+③.C — 再加 information panels（hyperparams / benchmark / legend / 公式注释）
+       - 选**角落留白**放 panel（不是"塞满式填空白"）
+       - panel 之间间距 ≥ 1cm
+       - 编译 + 渲染 → 审查 panel 是否补充而不喧宾夺主
+
+③.D — 整体审查（→ 进入 ④.5）
+       - 整图 Philosophy 检查（UNFORGETTABLE / 5 秒第一印象 / 主线眼睛轨迹）
+       - 18 项 last-mile bug 检查
+```
+
+**极简 / 中等档可以跳过 Module-First**，单次写完即可。**Module-First 只对复杂档强制**——它的价值是分阶段验证，避免 800 行 TikZ 一次出错导致整图崩坏。
+
+---
+
+**Module-First 之外的决策门**（B 路 vs 从零路）：
 
 **问 1：这张图是纯结构图吗？**（框 + 线 + 分组，**无**嵌入热力图/曲线/柱状/矩阵，**无** hero 内部多子节点）
 → Yes：**B 路（auto-layout）**
@@ -180,11 +228,11 @@ description: |
   - **优势**：0 个 Claude 选的坐标，0 类微斜线/穿框/拥挤 bug
 
 **问 2：富视觉图（嵌入可视化 / 复杂 hero 子结构 / 不规则布局）**
-→ **从零路**
+→ **从零路 + Module-First（③.A→③.D）**
   1. 起点：`references/tikz-template.tex`（含 preamble / 字体 / 配色 / **canonical 箭头 styles** / 防御写法）
   2. 加载 `references/visual-patterns.md`（9 个模式：hero 子结构、热力图、折线图、柱状图等）
-  3. 复杂连线（≥8 条交叉风险）：可选 `python3 references/tikz-path-router.py spec.json` A* 避障
-  4. 走 ④ 编译 + ④.5 视觉反馈
+  3. 按 ③.A→③.D 子流程：先 hero → 加主流 → 加 panels → 整体审查
+  4. 复杂连线（≥8 条交叉风险）：可选 `python3 references/tikz-path-router.py spec.json` A* 避障
 
 **🎯 箭头/连线必用 canonical pattern**（深度调研 2026-05-18，5 batches 教训）：
 `tikz-template.tex` 中 6 个预定义 styles 是经过 PGF 官方文档 + PlotNeuralNet 业界实践 + arrows.meta + bending library 综合调研的最佳实践：
