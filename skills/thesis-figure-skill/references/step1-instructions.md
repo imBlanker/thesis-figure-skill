@@ -75,6 +75,8 @@ TikZ 还是 draw.io，为什么（参考 SKILL.md 的工具能力边界表）。
 
 草图不合理就重画草图，**不要带着烂布局进入编码**。
 
+**复杂图选 form B（Narrative）替代 ASCII**：当图含 hero 子结构、嵌入热力图/曲线/矩阵、≥3 列、≥30 节点时，ASCII 字符无法画出嵌入可视化或复杂空间关系——改用 **form B Narrative 设计文字**（每列/每 zone 写一段空间描述，含 x/y 范围 + 内部子结构 + 留白处理）。完整 form A vs form B 选择规则 + Tacotron2 范例见 **SKILL.md ① 节**（"🔵 form A/B 选择前的先决条件" 块）。Narrative 形式同样写进 figure.tex 头部注释块作为 Step 0 E 段证据。
+
 ### 10. 可视化嵌入决策（混合图的关键）
 
 逐个模块扫描——这个模块有没有适合用迷你可视化表达的信息？

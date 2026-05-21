@@ -3,7 +3,7 @@
 > **何时加载**：步骤②加载专项规则时，同时加载本文件。
 > **本文件 = 验证过的最佳参数（表格）+ 不被全局规则覆盖的踩坑教训（清单）**
 >
-> 已合并自原 `evolution.md` + `experience-log.md`。
+> （原 `evolution.md` + `experience-log.md` 已于 2026-03 合并入本文件，**不再单独存在**——不要去 Read 这两个旧路径。）
 > **写入规则**：只追加经过验证的事实，不写未确认猜测。如果按经验操作失败，更新或删除该条。
 > **基线只升不降**：发现更优参数才更新，被证伪的不删除而是标注适用范围。
 
@@ -306,15 +306,23 @@
 - **发现日期**：2026-05-16
 
 #### [通用] - 箭头 tip 刺入目标框：shorten 数值取决于端点类型
+
+> ⚠️ **以下表格是 2026-05-16/17 历史经验值，已被 canonical template 取代**。
+> 当前 `tikz-template.tex` 的 `arrow/.style` 使用 `shorten >=2pt`（TeX Live 2024 实测，
+> 配合 `bending` library + `length=⟨dim⟩ ⟨line_width_factor⟩` 自动跟随 line width，
+> 不再按端点类型分挡）。**冲突时以 `tikz-template.tex` 为准**——
+> 不要回到手调 shorten >=6pt 的旧路径。本表保留作为历史教训背景，不作为执行依据。
+
 - **问题/发现 (Round 1, 2026-05-16)**：节点图里 `shorten >=2pt` 配合 `Stealth[scale=1.1]` 端点指向 `node.west` 时，tip 出现在节点框内部。
 - **问题/发现 (Round 2, 2026-05-17)**：Sequence 图里 `shorten >=6pt` 又**反过来**：指 Prover 等裸生命线时 tip 在生命线左侧 6pt 处悬空，看着像断线"线不够长"。
-- **解决方案——按端点类型分**：
+- **历史解决方案——按端点类型分**（已被 canonical template 取代）：
   | 端点类型 | shorten >= | 端点表达 |
   |---|---|---|
   | **节点图：node.west / node.east**（节点有可见边界）| **6pt** | `(target.west)` |
   | **Sequence: 激活条边缘**（命名节点的可见边）| **2pt** | `(actvVAuth.west &#124;- 0, y)` |
   | **Sequence: 裸生命线**（dashed 线无填充）| **2pt** | `(P.south &#124;- 0, y)` |
 - **关键认识**：`shorten >=` 不是万能值。**端点是否有可见边界**决定数值——有边界（节点边、激活条边）需要更大 shorten 让 tip 在边外；无边界（裸生命线）小 shorten 让 tip 紧贴线。
+- **当前 canonical 行动**：用 `tikz-template.tex` 的 `arrow/.style`，不要手写 shorten 数值。Sequence 图特殊端点（裸生命线）已被 `arrow short/.style` 覆盖（tip 3pt + shorten >=1pt）。
 - 模板里 01/02/04/05/06 用 6pt（节点端点）；03-sequence 用 2pt（激活+生命线混合，端点用 `actv.east/.west` 或 `lifeline.south`）。
 - **发现日期**：2026-05-16 / 2026-05-17（Round 2 细化）
 

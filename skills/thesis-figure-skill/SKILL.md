@@ -88,6 +88,21 @@ description: |
 
 步骤 ① 必须**以文字形式实际输出**（不是"想了就过"），且**第一段写进 figure.tex 头部注释块**作为证据。**形式两选一**，按图复杂度选：
 
+**🔵 form A/B 选择前的先决条件**（消除"节点数悖论"——判档依赖草图、草图依赖判档的循环）：
+
+```
+1. 先粗估档位（无需精确节点数，先看明显信号）：
+   ① 含 hero 子结构 / 嵌入热力图 / 多 panel / ≥3 列 → 复杂档 → form B
+   ② 含 fan-out / 时序生命线 / 12+ 模块 → 中等档 → form A 或 form B
+   ③ 纯几何/单链/对比图（明显 < 15 节点）→ 极简档 → form A
+2. 按粗判选 form 写注释块（form A 画 ASCII OR form B 写 narrative）
+3. 注释块写完后**数节点 → ①.5 精确确认档位**
+4. 若精确档位 ≠ 粗判档位 → 调整 form（极简误判为复杂 = 简化为 A；
+   复杂误判为极简 = ASCII 画不下 → 改写 B）
+```
+
+**铁律**：先粗判 → 写注释块 → ①.5 精确确认 → 必要时调整。**禁止凭直觉直接选 form 又凭直觉判档**。
+
 ### 形式 A — ASCII 草图（适合：极简档 + 中等档无嵌入 viz / 无 hero 子结构）
 
 ```latex
@@ -168,15 +183,22 @@ description: |
 
 ### ①.5 图档判断（创造性免责 + N/A 豁免）
 
-**先判图档**，再走④.5 自评 — 避免极简几何图被规则"过度设计"（Batch 12 fig114 Newton 3 轮答 138 项大半 N/A 的反面教材）：
+**先判图档**，再走④.5 自评 — 避免极简几何图被规则"过度设计"（Batch 12 fig114 Newton 3 轮答 138 项大半 N/A 的反面教材）。
 
-| 档位 | 判断 | ④.5 自评策略 |
+**判档方法**：步骤①注释块写完后，**数注释里出现的节点总数** + 看明显结构信号（hero / fan-out / 嵌入 viz / 时序），对照下表：
+
+| 档位 | 判断（注释块数节点 + 结构信号）| ④.5 自评策略 |
 |---|---|---|
-| **极简档** | ≤15 节点 AND 无 hero AND 无 fan-out AND 无时序生命线 AND 无嵌入 viz | 只走 13 ⭐ + S/T/M 基线共 ~18 项；其余 28 项**明确标 "N/A, 一句过"** |
+| **极简档** | ≤15 节点 AND 无 hero AND 无 fan-out AND 无时序生命线 AND 无嵌入 viz | **明确走 18 项**：S1-S7（不跑 S8/S9/S10）+ T1-T6（不跑 T7）+ M1-M7（不跑 M8/M9/M10）+ E3/E9/E13（13 ⭐ 中与极简图有关的 E 类）+ A1-A4（不跑 A5）；**其余 28 项明确标 "N/A, 一句过"** |
 | **中等档** | 15-30 节点 OR 有 hero OR 有 fan-out | 走全 46 项；E3/M6/S10 等若 0 候选写 "0 处, N/A" 一句即过 |
 | **复杂档** | ≥30 节点 OR 嵌入 viz OR 多 hero | 走全 46 项，每项详细证据 |
 
 **典型极简档**：几何示意（Newton/几何/向量）/纯曲线公式图（Bayesian/概率密度）/单链信号流（ConvNeXt block 主链）
+
+**Step 0 与极简档的关系**（避免"是否豁免"歧义）：
+- Step 0 全 5 段（A/B/C/D/E）**对所有档位强制**，不论极简/中等/复杂
+- 极简档的 E 段只需验证 form A（ASCII 注释块）存在 + 可辨认；form B 不适用极简档
+- 极简档豁免的是 46 项 checklist 中的 28 项，**不是 Step 0**
 
 **豁免铁律**：N/A 是"已知该项对本图不适用"，不是"懒得查"。写一句话说明（如"无 fan-out 结构, E3 N/A"），把节省的注意力集中在真正适用的项。
 
@@ -207,13 +229,13 @@ description: |
 **🎯 箭头/连线必用 canonical pattern**（深度调研 2026-05-18，5 batches 教训）：
 `tikz-template.tex` 中 6 个预定义 styles 是经过 PGF 官方文档 + PlotNeuralNet 业界实践 + arrows.meta + bending library 综合调研的最佳实践：
 
-| style | 用途 | 关键差异 |
-|---|---|---|
-| `arrow` / `arrow thick` / `arrow thin` | **长** 连线 ≥ 1.5cm | tip 6.5pt, `shorten >=2pt, shorten <=1pt` |
-| **`arrow short`** | **短** 箭头 < 1.5cm（相邻 box 间） | tip 3pt, `shorten >=1pt, shorten <=0pt` — 防止 tip 吃光 stem |
-| `residual` | dashed skip / 反馈 | 紫色虚线 + rounded corners |
-| `leader` | annotation 引线 | 灰色 dotted |
-| **`fan_stub`** / `fan_stub thin` / `fan_stub thick` | **fan-out 树状分叉的 stub**（spine → target） | **`shorten <=0pt`**——起点紧贴 spine 无 gap |
+| style | 用途 | 何时用（铁律） | 关键差异 |
+|---|---|---|---|
+| `arrow` / `arrow thick` / `arrow thin` | 长连线 | **⚠️ 仅 ≥ 1.5cm — 短于此必须改用 `arrow short`** | tip 6.5pt, `shorten >=2pt, shorten <=1pt` |
+| **`arrow short`** | 短箭头（相邻 box 间） | **⚠️ < 1.5cm 必用此 style** | tip 3pt, `shorten >=1pt, shorten <=0pt` — 防止 tip 吃光 stem |
+| `residual` | dashed skip / 反馈 | residual / feedback | 紫色虚线 + rounded corners |
+| `leader` | annotation 引线 | 引线 / 标注 leader | 灰色 dotted |
+| **`fan_stub`** / `fan_stub thin` / `fan_stub thick` | fan-out 树状分叉的 stub（spine → target） | **fan-out / fan-in 的 stub 段必用此** | **`shorten <=0pt`**——起点紧贴 spine 无 gap |
 
 **禁止**自己手写 `-{Stealth[scale=X]}`——4 轮 Batch 教训证明手调 scale 治标不治本。只调 `line width`（0.6/1.0/1.6pt 三档），tip 通过 `length=⟨dim⟩ ⟨line_width_factor⟩` 语法自动跟随。`\usetikzlibrary{bending}` **必加载**，否则弯折路径上 tip 必然 mis-align。
 
@@ -306,7 +328,7 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 | **B. 主线眼睛轨迹** | 找出图中**最重要的那条数据流**，用眼睛沿它从起点走到终点。任何"卡住"位置 = blocker（如 fig97 Pedersen 框里跑出箭头 / fig118 tip 撞坐标 / fig120 孤立彩点） | 法则 2 |
 | **C. 删除测试** | 列出**疑似可删的元素**（孤立装饰 / 多余 leader / 重复 label）。空则一句 "无可删元素" | 法则 3 |
 | **D. 审美退步测试**（round ≥ 2 时） | 对比上轮 PNG，本轮修了 X bug 但有没有引入新审美问题（对称丢 / 平行断 / 间距不均）？ | 法则 3 |
-| **E. 大块空白扫描 + 步骤①注释核验**（2026-05-21 fig126 教训）| (1) **图整体扫描有无 > 4cm × 4cm 大块空白**（fig126 Encoder 列下方 + WaveNet 横跨全宽 → 左下 5×6cm 空白）；(2) **打开 figure.tex 头部确认有"Step ① 设计文档"注释块**——形式 **A (ASCII 草图) 或 B (Narrative 描述)** 二选一（复杂图用 B）；若两种都没有 → critical blocker，回 ① 重做不是直接修 .tex | 法则 3 + 流程纪律 |
+| **E. 大块空白扫描 + 步骤①注释核验**（2026-05-21 fig126 教训）| (1) **图整体扫描有无 > 3cm × 2cm 大块空白**（阈值与 S6 对齐，避免阈值分叉）（fig126 Encoder 列下方 + WaveNet 横跨全宽 → 左下 5×6cm 空白）；(2) **打开 figure.tex 头部确认有"Step ① 设计文档"注释块**——形式 **A (ASCII 草图) 或 B (Narrative 描述)** 二选一（复杂图用 B）；(3) **内容最低要求**——form A 含可辨认 ASCII 草图（不只是模板边框）；form B 含至少一处 x/y 范围描述（如 "Encoder x=0-6cm"）。若 (1) fail OR (2) 两种都没有 OR (3) 注释块为空洞模板 → critical blocker，回 ① 重做不是直接修 .tex | 法则 3 + 流程纪律 |
 
 **Step 0 任一项 fail = blocker**，列入 patch 列表。**Step 0 通过才开始 Step 3 的 46 项**。
 
