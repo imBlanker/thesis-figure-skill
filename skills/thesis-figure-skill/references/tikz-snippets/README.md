@@ -60,12 +60,18 @@ Batch 13-17 演化教训：纯文本 Philosophy + 18 项 checklist 让 sub-agent
 
 ### 6. 🏆 完整 Figure 范例（GOLD STANDARD — sub-agent 复制后改 content）
 
-**Batch 19 用户反馈**：snippets 单个完美但**组合时仍有重叠/排版问题**。原因：sub-agent 复制 snippet 后自己定位坐标。这 2 个范例提供**完整 figure.tex 骨架**（含精确 zone 位置、所有 element 都 bounded 在 zone 内），sub-agent **复制整文件后只改 content** = 零位置 bug。
+**Batch 19 用户反馈**：snippets 单个完美但**组合时仍有重叠/排版问题**。原因：sub-agent 复制 snippet 后自己定位坐标。这 6 个范例提供**完整 figure.tex 骨架**（含精确 zone 位置、所有 element 都 bounded 在 zone 内），sub-agent **复制整文件后只改 content** = 零位置 bug。
 
-| 文件 | 骨架 | 预览 |
-|---|---|---|
-| `example-skeleton-B-horizontal.tex` | **B: 5 stage 横向**（适合 pipeline 类）| ![example-B](previews/example-skeleton-B-horizontal.png) |
-| `example-skeleton-C-centralhero.tex` | **C: 中央 hero + 4 panels**（适合 model card 类）| ![example-C](previews/example-skeleton-C-centralhero.png) |
+**Batch 20 用户复审**：原 2 个范例（B/C）已生效（1 round 收敛 + 0 位置 bug）。**新增 4 个 GOLD STANDARD 范例**（D/E/F/G），都从用户历史质量最高的产物直接复制改造而来。
+
+| 文件 | 骨架 | 适用场景 | 预览 |
+|---|---|---|---|
+| `example-skeleton-B-horizontal.tex` | **B: 5 stage 横向** | Pipeline 类 / 训练流程 | ![example-B](previews/example-skeleton-B-horizontal.png) |
+| `example-skeleton-C-centralhero.tex` | **C: 中央 hero + 4 panels** | Model card / Architecture paper | ![example-C](previews/example-skeleton-C-centralhero.png) |
+| `example-skeleton-D-vertical-sidepanel.tex` ⭐ | **D: 3 段竖向 + 右侧 side panel** | 联邦学习 / 多方协议 / 安全分析含 radar | ![example-D](previews/example-skeleton-D-vertical-sidepanel.png) |
+| `example-skeleton-E-multimodal-fusion.tex` ⭐ | **E: 5 stage + 多平行 input + 多 viz** | 多模态融合 (vision+text+audio) / 可解释 AI | ![example-E](previews/example-skeleton-E-multimodal-fusion.png) |
+| `example-skeleton-F-multiphase-multisub.tex` ⭐ | **F: 4 phase + 每 phase 多 vertical sub-elements** | 多方协议 (MPC / threshold sig) / 多阶段含内部多元素 | ![example-F](previews/example-skeleton-F-multiphase-multisub.png) |
+| `example-skeleton-G-federated-vertical.tex` ⭐ | **G: 3 层竖向 + 中央 hero + N 平行 instance** | 联邦学习 / 边缘云 / 1 central + N parallel | ![example-G](previews/example-skeleton-G-federated-vertical.png) |
 
 **关键设计原则**（这 2 个范例都遵循）：
 
