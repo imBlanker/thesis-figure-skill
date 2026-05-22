@@ -27,11 +27,13 @@
 \begin{tikzpicture}
 
 %% COPY-START (Variant A — Single metric, FID-style) =================
+% Note: use \large (not \Large) — figure-embedded cards should match
+% surrounding box font weight. \Large breaks visual hierarchy.
 \node[draw=acaBlueLine, fill=acaBlueFill, rounded corners=4pt,
-      line width=0.7pt, minimum width=3.5cm, minimum height=1.5cm,
-      align=center, inner sep=6pt]
+      line width=0.7pt, minimum width=3.0cm, minimum height=1.3cm,
+      align=center, inner sep=5pt]
   (cardA) at (0, 0) {%
-    {\Large\bfseries\color{acaBlueLine} 3.17}\\[2pt]
+    {\large\bfseries\color{acaBlueLine} 3.17}\\[1pt]
     {\scriptsize\color{acaGreyLine} FID on CIFAR-10}
   };
 %% COPY-END Variant A ================================================
@@ -39,12 +41,12 @@
 
 %% COPY-START (Variant B — With baseline comparison) =================
 \node[draw=acaGreenLine, fill=acaGreenFill, rounded corners=4pt,
-      line width=0.7pt, minimum width=4.0cm, minimum height=1.8cm,
-      align=center, inner sep=6pt]
-  (cardB) at (5, 0) {%
-    {\Large\bfseries\color{acaGreenLine} 76.0\%}\\[2pt]
-    {\scriptsize\color{acaGreyLine} Top-1 Acc. (ImageNet)}\\[4pt]
-    {\scriptsize\color{acaOrangeLine}$\uparrow\,+2.3\%$ vs ResNet-34}%
+      line width=0.7pt, minimum width=3.5cm, minimum height=1.5cm,
+      align=center, inner sep=5pt]
+  (cardB) at (4.5, 0) {%
+    {\large\bfseries\color{acaGreenLine} 76.0\%}\\[1pt]
+    {\scriptsize\color{acaGreyLine} Top-1 Acc. (ImageNet)}\\[3pt]
+    {\tiny\color{acaOrangeLine}$\uparrow\,+2.3\%$ vs ResNet-34}%
   };
 %% COPY-END Variant B ================================================
 
@@ -55,12 +57,12 @@
   29.9/BLEU/acaGreenLine,%
   88.5/F1/acaOrangeLine%
 } {
-  \pgfmathsetmacro\cx{10 + (\i - 1) * 2.5}
+  \pgfmathsetmacro\cx{9 + (\i - 1) * 2.0}
   \node[draw=\col, fill=white, rounded corners=3pt,
-        line width=0.5pt, minimum width=2.2cm, minimum height=1.2cm,
-        align=center, inner sep=4pt]
+        line width=0.5pt, minimum width=1.8cm, minimum height=1.0cm,
+        align=center, inner sep=3pt]
     at (\cx, 0) {%
-      {\large\bfseries\color{\col} \val}\\[1pt]
+      {\normalsize\bfseries\color{\col} \val}\\[1pt]
       {\tiny\color{acaGreyLine} \lab}%
     };
 }

@@ -190,20 +190,21 @@
   at (\xH + \N*\cs/2, \yH + 0.05) {Attention Weights ($N=8$)};
 
 % Right: 2 formula boxes at x=[13.5, 20]
+% Use \footnotesize for formulas — matches surrounding box label size
 \node[rectangle, rounded corners=3pt, fill=acaPurpleBg,
-      draw=acaPurpleLine, line width=0.5pt, inner sep=5pt,
+      draw=acaPurpleLine, line width=0.5pt, inner sep=4pt,
       align=center, text=acaPurpleLine,
       minimum width=6.0cm]
   (form1) at (16.75, 4.3)
-  {{\small\bfseries Scaled Dot-Product}\\[3pt]
-   $\text{Attn}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V$};
+  {{\scriptsize\bfseries Scaled Dot-Product}\\[2pt]
+   $\scriptstyle\text{Attn}(Q,K,V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V$};
 \node[rectangle, rounded corners=3pt, fill=white,
-      draw=acaPurpleLine, line width=0.5pt, inner sep=5pt,
+      draw=acaPurpleLine, line width=0.5pt, inner sep=4pt,
       align=center, text=acaPurpleLine,
       minimum width=6.0cm]
   (form2) at (16.75, 2.6)
-  {{\small\bfseries FFN}\\[3pt]
-   $\text{FFN}(x) = W_2 \cdot \text{ReLU}(W_1 x + b_1) + b_2$};
+  {{\scriptsize\bfseries FFN}\\[2pt]
+   $\scriptstyle\text{FFN}(x) = W_2 \cdot \text{ReLU}(W_1 x + b_1) + b_2$};
 
 % =====================================================================
 % LD PANEL: Pipeline — x=[0, 9.5], y=[-2.5, 1.0]
@@ -234,17 +235,18 @@
 \drawzone{acaGreenLine}{acaGreenLine}{11.0}{-2.5}{21.0}{1.0}
 \zonetitle{acaGreenLine}{11}{21}{1.0}{Performance Metrics}
 
+% Metric cards (use \large not \Large — matches surrounding box font)
 \node[draw=acaGreenLine, fill=white, rounded corners=4pt,
-      line width=0.6pt, minimum width=3.8cm, minimum height=1.4cm,
-      align=center, inner sep=5pt]
+      line width=0.6pt, minimum width=3.5cm, minimum height=1.2cm,
+      align=center, inner sep=4pt]
   at (13.5, -0.5)
-  {{\Large\bfseries\color{acaGreenLine} 72.5\%}\\[2pt]
+  {{\large\bfseries\color{acaGreenLine} 72.5\%}\\[1pt]
    {\scriptsize\color{acaGreyLine} Average benchmark}};
 \node[draw=acaOrangeLine, fill=white, rounded corners=4pt,
-      line width=0.6pt, minimum width=3.8cm, minimum height=1.4cm,
-      align=center, inner sep=5pt]
+      line width=0.6pt, minimum width=3.5cm, minimum height=1.2cm,
+      align=center, inner sep=4pt]
   at (18.5, -0.5)
-  {{\Large\bfseries\color{acaOrangeLine} 350M}\\[2pt]
+  {{\large\bfseries\color{acaOrangeLine} 350M}\\[1pt]
    {\scriptsize\color{acaGreyLine} Parameters}};
 
 \node[font=\scriptsize\itshape, color=acaGreyLine, anchor=north]

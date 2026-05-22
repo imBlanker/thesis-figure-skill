@@ -163,10 +163,13 @@
       minimum width=3.5cm] (s4_lin) at (17.25, 5.9) {Linear Proj};
 
 % Mini bar chart (3 bars, no foreach to avoid idx issues)
-\def\xBC{15.6}\def\yBC{3.5}
+% Title ABOVE bars (avoids overlap with A/B/C x-axis labels)
+\def\xBC{15.6}\def\yBC{3.0}
+\node[font=\tiny, color=acaGreyLine, anchor=south]
+  at (\xBC + 1.3, \yBC + 1.3) {Method Comparison};
 \foreach \name/\val/\xoff in {A/0.85/0.0, B/0.92/1.0, C/0.78/2.0} {
   \pgfmathsetmacro\bx{\xBC + \xoff}
-  \pgfmathsetmacro\bh{1.2 * \val}
+  \pgfmathsetmacro\bh{1.1 * \val}
   \fill[acaOrangeBg] (\bx, \yBC) rectangle (\bx + 0.6, \yBC + \bh);
   \draw[acaOrangeLine, line width=0.4pt]
     (\bx, \yBC) rectangle (\bx + 0.6, \yBC + \bh);
@@ -175,8 +178,6 @@
   \node[font=\tiny, color=acaGreyLine, anchor=north]
     at (\bx + 0.3, \yBC - 0.05) {\name};
 }
-\node[font=\tiny, color=acaGreyLine, anchor=south]
-  at (\xBC + 1.3, \yBC - 0.45) {Method Comparison};
 
 % =====================================================================
 % STAGE 5: OUTPUT (Green) — x=[20, 24.5]
@@ -186,12 +187,12 @@
 \node[base box, fill=white, draw=acaGreenLine, text=acaGreenLine!30!black,
       minimum width=3.5cm] (s5_out) at (22.25, 6.8) {Output};
 
-% Metric card
+% Metric card (use \large not \Large — matches surrounding box font)
 \node[draw=acaGreenLine, fill=white, rounded corners=4pt,
-      line width=0.6pt, minimum width=3.0cm, minimum height=1.5cm,
+      line width=0.6pt, minimum width=3.0cm, minimum height=1.3cm,
       align=center, inner sep=4pt] at (22.25, 5.2)
-  {{\Large\bfseries\color{acaGreenLine} 92.4\%}\\[2pt]
-   {\tiny\color{acaGreyLine} Top-1 Acc.}};
+  {{\large\bfseries\color{acaGreenLine} 92.4\%}\\[1pt]
+   {\scriptsize\color{acaGreyLine} Top-1 Acc.}};
 
 \node[font=\scriptsize, color=acaGreenLine, anchor=south, align=center]
   at (22.25, 2.4) {SOTA on\\Benchmark X};
