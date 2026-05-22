@@ -71,8 +71,8 @@
 \node[stage title=acaTealLine, anchor=north]
   at ([yshift=-0.15cm]s1.north) {Stage 1: Input};
 % --- INSIDE stage 1: put your snippet content here ---
-\node[font=\scriptsize, anchor=center, color=acaTealLine]
-  at (s1.center) {\textit{(heatmap / graph / formula\\here)}};
+\node[font=\scriptsize, anchor=center, align=center, color=acaTealLine]
+  at (s1.center) {\itshape (heatmap / graph / formula\\here)};
 
 % Stage 2 (Purple)
 \node[stage zone=acaPurpleLine,
@@ -81,8 +81,8 @@
   (s2) at ($(s1.north east) + (\stageGap, 0)$) {};
 \node[stage title=acaPurpleLine, anchor=north]
   at ([yshift=-0.15cm]s2.north) {Stage 2: Process};
-\node[font=\scriptsize, anchor=center, color=acaPurpleLine]
-  at (s2.center) {\textit{(heatmap / graph / formula\\here)}};
+\node[font=\scriptsize, anchor=center, align=center, color=acaPurpleLine]
+  at (s2.center) {\itshape (heatmap / graph / formula\\here)};
 
 % Stage 3 (Orange)
 \node[stage zone=acaOrangeLine,
@@ -91,8 +91,8 @@
   (s3) at ($(s2.north east) + (\stageGap, 0)$) {};
 \node[stage title=acaOrangeLine, anchor=north]
   at ([yshift=-0.15cm]s3.north) {Stage 3: Output};
-\node[font=\scriptsize, anchor=center, color=acaOrangeLine]
-  at (s3.center) {\textit{(heatmap / graph / formula\\here)}};
+\node[font=\scriptsize, anchor=center, align=center, color=acaOrangeLine]
+  at (s3.center) {\itshape (heatmap / graph / formula\\here)};
 
 %% COPY-END ===========================================================
 

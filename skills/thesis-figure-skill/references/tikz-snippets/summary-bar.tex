@@ -1,20 +1,21 @@
 % =====================================================================
 % Snippet: summary-bar.tex
 % =====================================================================
-% USAGE: Bottom pipeline summary bar — N labels separated by arrows.
-% This is what test-gat figure has at the bottom:
-%   Molecule -[GAT]-> (A, X) -[GAT]-> α_ij Weighted -[Multi-head]-> ...
+% USAGE: Bottom pipeline summary bar — stages connected by labeled
+% arrows. e.g.: Molecule -[GAT]-> (A,X) -[GAT]-> α_ij -[Multi-head]-> ...
 %
-% Copy %% COPY-START / END, replace:
-%   - stages: \def\sumdata{label/edge, label/edge, ...}
-%     - label: stage name
-%     - edge: arrow label text (empty = no label)
-%   - origin_x, origin_y
-%   - item_gap: spacing between stage centers (default 2.5)
+% KEY DESIGN: Uses anchor-relative chaining (each stage placed at
+% previous.east + fixed arrow distance) so long stage labels
+% (e.g., "Atom Importance") cannot overlap previous stage's edge label.
+% v1 used fixed itemGap which broke for long labels.
+%
+% Sub-agent customization: edit the 5 \node...at calls + 4 \draw...node
+% calls below. Stage count = 5 hard-coded; for different counts, add/
+% remove (node + draw) pairs.
 % =====================================================================
 
 \documentclass[tikz,border=10pt]{standalone}
-\usepackage{xcolor,tikz}
+\usepackage{xcolor,tikz,amsmath,amssymb}
 \usetikzlibrary{positioning,calc,arrows.meta,bending}
 
 \definecolor{acaGreyLine}{HTML}{606060}
@@ -33,35 +34,46 @@
     line width=0.6pt, color=acaPurpleLine,
     shorten >=1pt, shorten <=1pt,
   },
+  edge label/.style={
+    midway, above, font=\tiny, color=acaPurpleLine,
+    inner sep=1pt, yshift=-1pt,
+  },
 }
 
 \begin{document}
 \begin{tikzpicture}
 
 %% COPY-START =========================================================
-% Note: \foreach can't handle entries with `,` inside math, so we
-% hard-code 5 entries. For your figure, edit labels + edge texts below.
+% Stages chained via right=0.7cm of <prev>. Arrow gap fixed regardless
+% of stage label length — guaranteed no overlap with edge label above.
 
-\def\xO{0}
-\def\yO{0}
-\def\itemGap{2.6}
+\def\arrgap{1.6cm}   % fixed gap between adjacent stages — must be
+                      % wider than longest edge label (e.g.,
+                      % "Readout+MLP" ≈ 1.3cm in \tiny). If your edge
+                      % labels are longer, increase to 2.0cm+.
 
-% --- STAGES ---
-\node[sum stage] (sb1) at (\xO + 0*\itemGap, \yO) {Molecule};
-\node[sum stage] (sb2) at (\xO + 1*\itemGap, \yO) {$(\mathbf{A}, \mathbf{X})$};
-\node[sum stage] (sb3) at (\xO + 2*\itemGap, \yO) {$\alpha_{ij}$ Weighted};
-\node[sum stage] (sb4) at (\xO + 3*\itemGap, \yO) {128-dim};
-\node[sum stage] (sb5) at (\xO + 4*\itemGap, \yO) {Atom Importance};
+% Stage 1 (anchor at origin)
+\node[sum stage] (sb1) at (0, 0) {Molecule};
 
-% --- ARROWS WITH EDGE LABELS ---
+% Stage 2 (placed right of sb1, with arrow between)
+\node[sum stage, right=\arrgap of sb1] (sb2) {$(\mathbf{A}, \mathbf{X})$};
 \draw[sum arrow] (sb1.east) -- (sb2.west)
-  node[midway, above, font=\tiny, color=acaPurpleLine] {GAT};
+  node[edge label] {GAT};
+
+% Stage 3
+\node[sum stage, right=\arrgap of sb2] (sb3) {$\alpha_{ij}$ Weighted};
 \draw[sum arrow] (sb2.east) -- (sb3.west)
-  node[midway, above, font=\tiny, color=acaPurpleLine] {GAT};
+  node[edge label] {GAT};
+
+% Stage 4
+\node[sum stage, right=\arrgap of sb3] (sb4) {128-dim};
 \draw[sum arrow] (sb3.east) -- (sb4.west)
-  node[midway, above, font=\tiny, color=acaPurpleLine] {Multi-head};
+  node[edge label] {Multi-head};
+
+% Stage 5
+\node[sum stage, right=\arrgap of sb4] (sb5) {Atom Importance};
 \draw[sum arrow] (sb4.east) -- (sb5.west)
-  node[midway, above, font=\tiny, color=acaPurpleLine] {Readout+MLP};
+  node[edge label] {Readout+MLP};
 
 %% COPY-END ===========================================================
 
