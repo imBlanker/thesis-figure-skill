@@ -82,16 +82,30 @@ description: |
 
 **Batch 17 fig153 教训**：Philosophy 文本指南让 sub-agent **知道要嵌入 viz / panel / 公式**，但**写出来的视觉重量、留白、配色协调仍然失败**——因为这些是 visual perception 而非 textual 任务。
 
-**解决方案**：`references/tikz-snippets/` 提供 6 个手工精雕的 TikZ 片段——sub-agent **复制粘贴 + 替换参数**即可达到 examples 标杆的视觉重量：
+**解决方案**：`references/tikz-snippets/` 提供 **11 个手工精雕的 TikZ 片段 + 1 个组合规则文档**——sub-agent **复制粘贴 + 替换参数 + 按组合规则拼装**即可达到 examples 标杆：
 
-- `attention-heatmap.tex` — N×N 热力图 + colorbar（Transformer / GAT / ViT 必用）
-- `bar-chart.tex` — benchmark 柱状图 + grid（含 metrics 时用）
-- `hyperparams-table.tex` — 参数表（含 model spec 时用）
-- `multi-zone-palette.tex` — 6 色 zone tone 标准配色（任何复杂档用）
-- `pipeline-stages.tex` — N-stage 水平管线（主流结构用）
-- `formula-box.tex` — 公式 box 3 种 variant（公式嵌入 box 用）
+**零件**（手工精雕）：
+- `attention-heatmap.tex` — N×N 热力图 + colorbar
+- `bar-chart.tex` — benchmark 柱状图 + grid
+- `hyperparams-table.tex` — 参数表
+- `multi-zone-palette.tex` — 6 色 zone tone palette
+- `pipeline-stages.tex` — N-stage 水平管线
+- `formula-box.tex` — 公式 box 3 种 variant
+- **`stage-container.tex`** ⭐ — stage 容器（标题 + zone + anchor），自带 self-contained 模块
+- **`color-legend.tex`** ⭐ — 底部 N 色 legend strip
+- **`summary-bar.tex`** ⭐ — 底部 pipeline summary bar（箭头连接 stages）
+- **`embedded-graph.tex`** ⭐ — 真实 graph viz (star/cycle pattern)
+- **`scatter-plot.tex`** ⭐ — 散点图（predicted vs actual + R²）
 
-**复杂档应该考虑用 ≥ 3 个 snippet 拼装**，比从零写更接近 examples 标杆。**绝对不能"简化"snippet 核心结构**——简化 = 信息稀疏 = 平庸。
+**组合规则**（**必读**）：
+- **`COMPOSITION-RULES.md`** — snippet 间留白 / 对齐 / Z-order / 整图骨架（双栏对称 / 5 stage 横向 / 中央 hero + 4 panels）
+
+**复杂档强制**：
+1. 拼装 ≥ 3 个 snippet（不是从零写）
+2. **必读 `COMPOSITION-RULES.md`**（解决 fig153 v3 的"snippets 都塞进去但仍乱"问题）
+3. 选 A/B/C 三种骨架之一（不要自创随机布局）
+4. 底部必有 color-legend OR summary-bar
+5. **绝对不能"简化"snippet 核心结构**——简化 = 信息稀疏 = 平庸
 
 ## 硬约束（违反必失败）
 

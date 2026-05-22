@@ -1,0 +1,72 @@
+% =====================================================================
+% Snippet: color-legend.tex
+% =====================================================================
+% USAGE: Horizontal color legend strip for the bottom of the figure.
+% Maps each color used in zones/boxes to a semantic label.
+% This is what test-transformer figure has at the bottom row:
+%   ■ Multi-Head Attention  ■ Feed-Forward  ■ Add & Norm  ...
+%
+% Copy %% COPY-START / END, replace:
+%   - legend list: \def\legdata{color/label, color/label, ...}
+%   - origin_x, origin_y
+%   - dot_size: cm (default 0.25)
+%   - item_gap: cm spacing between items (default 1.8)
+%
+% Recommended: place at y = bottom of figure - 0.5cm, centered on x.
+% Use 4-7 items (>7 = clutter).
+% =====================================================================
+
+\documentclass[tikz,border=10pt]{standalone}
+\usepackage{xcolor,tikz}
+\usetikzlibrary{positioning,calc}
+
+\definecolor{acaBlueLine}{HTML}{3060A8}
+\definecolor{acaPurpleLine}{HTML}{6E3FA0}
+\definecolor{acaOrangeLine}{HTML}{D06020}
+\definecolor{acaGreenLine}{HTML}{389050}
+\definecolor{acaTealLine}{HTML}{1F8F8F}
+\definecolor{acaGoldLine}{HTML}{B08820}
+\definecolor{acaGreyLine}{HTML}{606060}
+
+\begin{document}
+\begin{tikzpicture}
+
+%% COPY-START =========================================================
+
+\def\legdata{%
+  acaBlueLine/Multi-Head Attention,%
+  acaPurpleLine/Feed-Forward Network,%
+  acaTealLine/Add \& Norm,%
+  acaOrangeLine/Masked Attention,%
+  acaGreenLine/Cross-Attn / Linear,%
+  acaGoldLine/Positional Enc%
+}
+\def\xO{0}
+\def\yO{0}
+\def\dotSize{0.22}
+\def\itemGap{2.6}
+
+% --- LABEL "Color Legend:" ---
+\node[font=\small\bfseries, color=acaGreyLine, anchor=east]
+  at (\xO - 0.2, \yO) {Color Legend:};
+
+% --- ITEMS ---
+\newcount\legcount \legcount=0
+\foreach \col/\lab in \legdata {
+  \global\advance\legcount by 1
+  \edef\lidx{\the\legcount}
+  \pgfmathsetmacro\cx{\xO + (\lidx - 1) * \itemGap}
+  % colored square
+  \fill[\col] (\cx, \yO - \dotSize/2) rectangle
+    (\cx + \dotSize, \yO + \dotSize/2);
+  \draw[\col, line width=0.4pt] (\cx, \yO - \dotSize/2) rectangle
+    (\cx + \dotSize, \yO + \dotSize/2);
+  % label
+  \node[font=\scriptsize, color=acaGreyLine, anchor=west]
+    at (\cx + \dotSize + 0.1, \yO) {\lab};
+}
+
+%% COPY-END ===========================================================
+
+\end{tikzpicture}
+\end{document}
