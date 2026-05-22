@@ -25,6 +25,39 @@
 % ST-GNN (spatial attn + temporal conv) + edge preprocessing per city +
 % multi-modal sensors (camera/磁/GPS) + result bar chart + dashed
 % feedback rails (上传/下发) + 中文 vertical right label "联邦迭代".
+%
+% CONSTRAINTS — DO NOT VIOLATE (each one fixed a real bug):
+%
+%   [RENAMING]
+%   - 中心服务器 / 加权 FedAvg 聚合 — RENAME for non-FL topics
+%     (e.g., "Coordinator / Multi-Agent Aggregator" for multi-agent LLM).
+%   - 3 city names + 3 ST-GNN heroes — RENAME (e.g., 3 agents/workers).
+%   - 3 sets of multi-modal sensors (camera/磁/GPS) — RENAME to topic
+%     input modalities.
+%   - "联邦迭代" right-side vertical label — RENAME to topic loop name.
+%   - Bottom bar chart labels AND bar heights — RENAME labels AND
+%     recompute bar heights to match the new numeric labels.
+%
+%   [small_blue BOX TEXT LIMIT — hardcoded 1.6cm width]
+%   - small_blue is fixed 1.6cm wide → max ~5 CJK chars OR ~10 English
+%     chars. Text like "LLM (GPT-4)" truncates inside the box.
+%     Use a single short token ("LLM" or "GPT-4"), not both.
+%
+%   [ZONE CHIPS (3 layer labels) — position above zones]
+%   - All 3 chips use anchor=south west, positioned ABOVE their zone
+%     (chip y > zone top y). Do NOT place chips inside the zone's
+%     top-left corner — they overlap the content immediately below.
+%
+%   [CHART PANEL — must enclose ALL its parts]
+%   - Panel rectangle MUST span the full y-range of: x-axis arrow tip,
+%     AND axis tick labels, AND chart title. Current bounds: y=0.4 to
+%     y=4.6 (height 4.2cm); title at y=3.9; "数据不出域" chip at y=3.9.
+%   - Bar heights MUST match their numeric labels — recompute if you
+%     change data values, do NOT keep old heights.
+%
+%   [ZONE BOUNDS — leave room for adjacent chips/titles]
+%   - Training zone bottom y=8.6 (gap above for 本地训练层 chip).
+%   - Edge zone bottom y=4.6 (clearance for chart title at y=3.9).
 % =====================================================================
 
 \documentclass[tikz,border=30pt]{standalone}

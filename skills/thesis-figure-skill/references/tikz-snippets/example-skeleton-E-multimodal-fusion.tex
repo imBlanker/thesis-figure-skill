@@ -19,6 +19,29 @@
 %
 % CONTAINS: 3 parallel modality inputs + projection + cross-attn hero
 % with embedded heatmap + 2 task heads + SHAP/GPT panels + bottom bar.
+%
+% CONSTRAINTS — DO NOT VIOLATE:
+%
+%   [RENAMING]
+%   - 3 modality input names (e.g., CT/MRI/PET) — RENAME to topic
+%     modalities (vision+text+audio, RGB+depth+IR, etc.).
+%   - Hero "Cross-Attention" — RENAME for non-attention fusion.
+%   - 2 task heads — RENAME to topic outputs.
+%   - Data annotation box content (dataset name/size) — RENAME.
+%
+%   [SUB-PANEL CENTERING — these shifts were tuned by hand]
+%   - 细分类头 bar chart x-shift = 15.45 (centered at zone x=16.5).
+%   - Mini Grad-CAM heatmap x-shift = 20.7 (centered at zone x=21.5).
+%     If you move the parent zones, recompute shifts to recenter.
+%   - Data annotation box uses anchor=north at (25.5, 15.3).
+%     Do NOT change to anchor=north east at (27.0, 15.3) — visually
+%     off-center against the zone.
+%
+%   [MDT FEEDBACK DASHED LINE — critical]
+%   - Path MUST be orthogonal U-shape: from MDT down to y=-1.0, then
+%     LEFT along y=-1.0 across the figure, then UP to input height,
+%     then RIGHT into path input. NEVER use a diagonal — a diagonal
+%     line crosses the entire figure body and ruins the layout.
 % =====================================================================
 
 \documentclass[tikz,border=30pt]{standalone}

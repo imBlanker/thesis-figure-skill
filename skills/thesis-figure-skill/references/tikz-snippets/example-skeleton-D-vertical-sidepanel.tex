@@ -25,6 +25,32 @@
 % CONTAINS: 4 parallel clients + 3 pipeline steps with embedded math +
 % radar chart + advantages list + 2 bottom charts. Supports 中文/English
 % mix (uses ctex + PingFang SC — requires macOS font or substitute).
+%
+% CONSTRAINTS — DO NOT VIOLATE (each one caused a real layout bug):
+%
+%   [RENAMING — most common sub-agent failure: leaving stale template labels]
+%   - 4 top clients labeled "Client A/B/C/D" — RENAME ALL to match topic
+%     (e.g., "Expert 1..4" for MoE, "Worker i" for distributed). Do not
+%     leave any "Client X" if the topic is not FL.
+%   - 3 zone labels "Client Layer" / "Cryptographic Pipeline" /
+%     "Global Model & Evaluation" — RENAME to topic.
+%   - "Local SGD η=0.01" residual under client box — RENAME or remove.
+%   - Radar 5 axis labels (Privacy/Robustness/Accuracy/Comm/Compute) —
+%     RENAME but keep them SHORT (see radar constraint).
+%
+%   [RADAR CHART — strict label rules]
+%   - 270° (bottom) axis label MUST be SINGLE LINE (e.g., "Accuracy").
+%     2-line label like "Model\\Accuracy" overlaps the legend at y≈12-13.
+%   - Legend fixed at (19.5, 12.0); Advantages box at (19.5, 11.4)
+%     anchor=north. If you reposition radar/legend, move advantages too,
+%     and extend security zone bottom (currently y=9.0) to match.
+%
+%   [ARROW + LABEL POSITIONING]
+%   - Δw and Enc(Δw) labels go BESIDE arrows (anchor=west/east + ~0.15cm
+%     offset), NOT on top of arrows — text-on-arrow overlap.
+%   - FedAvg → bottom charts: use DIRECT diagonals. NOT L-shape (-|) when
+%     the waypoint y equals the target y — that produces a horizontal
+%     arrowhead at the chart top instead of pointing down.
 % =====================================================================
 
 \documentclass[tikz,border=25pt]{standalone}

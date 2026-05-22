@@ -22,6 +22,41 @@
 % CONTAINS: 4 phase containers + Phase 1 (3 setup sub-blocks) + Phase 2
 % (3 parallel parties) + Phase 3 (Garbled Circuit + OT + Eval hero) +
 % Phase 4 (Output Recovery + ZK Verification + Performance bar).
+%
+% CONSTRAINTS — DO NOT VIOLATE (each one fixed a real bug):
+%
+%   [RENAMING]
+%   - 4 phase names (Setup/Encrypt/Compute/Output) — RENAME to topic stages.
+%   - 3 parties in Phase 2 (A/B/C) — RENAME.
+%   - Phase 3 hero (Garbled Circuit / OT / Eval) — RENAME.
+%   - Phase 4 sub-elements (Output Recovery / ZK Verify / Performance) — RENAME.
+%   - Performance bar labels (Setup/Online/Verify/Total) MUST be ≤ 6 chars
+%     each — longer labels truncate inside the 3.6cm-wide chart.
+%
+%   [PHASE CHIPS + ZONES — uniform appearance is required]
+%   - All 4 phase chip labels positioned at uniform y=16.8 with the same
+%     anchor convention. Inconsistent anchors look ragged.
+%   - All 4 zone tops uniform y=16.5; all 4 zone bottoms uniform y=6.0.
+%
+%   [PARTY BOXES (Phase 2) — shares matrix placement]
+%   - The small "shares" matrix for each party goes BELOW the party box
+%     (y below ybase), NOT inside the box — it overlaps the centered
+%     formula text inside the box otherwise.
+%
+%   [PHASE 3 HERO — keep right side clean]
+%   - Do NOT add a "Gate count" or any side chart to the right of the
+%     Eval formula box. A previous version had this and it always
+%     overlapped the formula. The right region must stay empty.
+%
+%   [PHASE 4 PERFORMANCE BOX — strict sizing]
+%   - Box width = 3.6cm (NOT 4.0cm). It must leave margin against the
+%     4.0cm-wide Phase 4 zone, or it visually hugs the zone edge.
+%   - x-axis arrow tip x ≤ 3.3 (in local Performance coords). x=3.6
+%     overflows the 3.6cm box and the arrow pokes out.
+%
+%   [CRS / SECURITY NOTES — vertical stacking]
+%   - CRS Setup at y=8.25; Security note at y=6.2 (NOT y=7.6 — that
+%     overlapped CRS in a previous version).
 % =====================================================================
 
 \documentclass[tikz,border=25pt]{standalone}
