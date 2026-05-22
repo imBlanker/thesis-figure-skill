@@ -61,9 +61,10 @@
   (\xO, \yO - \tabH) rectangle (\xO + \colW, \yO + \rowH);
 
 % --- ROWS (alternating fill for readability) ---
-\pgfmathsetmacro\idx{0}
-\foreach \k/\v in \tabdata {
-  \pgfmathsetmacro\idx{\idx+1}
+% Use foreach's built-in [count=\idx] — this is the ONLY reliable
+% way to accumulate index across iterations. \pgfmathsetmacro\idx{\idx+1}
+% can fail silently because foreach has local scope.
+\foreach [count=\idx] \k/\v in \tabdata {
   \pgfmathsetmacro\ypos{\yO - (\idx - 1) * \rowH}
   \pgfmathsetmacro\altfill{int(mod(\idx,2))}
   % alternate row fill

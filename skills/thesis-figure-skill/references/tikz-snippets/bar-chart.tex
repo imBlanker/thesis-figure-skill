@@ -59,9 +59,8 @@
   at (\xO - 0.5, \yO + \chartH/2) {Score (\%)};
 
 % --- BARS ---
-\pgfmathsetmacro\idx{0}
-\foreach \name/\val in \bardata {
-  \pgfmathsetmacro\idx{\idx+1}
+% Use foreach's [count=\idx] — reliable accumulation (see hyperparams-table.tex note)
+\foreach [count=\idx] \name/\val in \bardata {
   \pgfmathsetmacro\cx{\xO + \idx * \barGap - \barGap/2}
   \pgfmathsetmacro\bh{\chartH * \val / \maxval}
   % bar
