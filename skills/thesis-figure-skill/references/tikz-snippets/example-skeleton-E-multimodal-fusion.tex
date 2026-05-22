@@ -166,7 +166,10 @@
     {23个具体病种};
 
 % Embedded accuracy comparison bar chart in fine classification box
-\begin{scope}[shift={(15.2, 6.8)}]
+% Center math: bars 粗(0.3-0.9)+细(1.2-1.8) group center=1.05; zone center
+% x=16.5; shift was 15.2 (group abs center 16.25, off-left by 0.25cm).
+% Adjusted to 15.45 so group center = 16.5 ✓
+\begin{scope}[shift={(15.45, 6.8)}]
   \draw[-{Stealth[scale=0.5]}, drawGreyLine] (0.0, 0.0) -- (0.0, 2.2);
   \draw[-{Stealth[scale=0.5]}, drawGreyLine] (0.0, 0.0) -- (2.8, 0.0);
   % Bars: coarse vs fine accuracy
@@ -197,7 +200,10 @@
 % Fix E.5: was shift=(20.5, 12.6) → bottom row at y=11.55, outside
 % node bottom y=12.25 (Grad-CAM node center 13.5, height 2.5).
 % Moved up to (20.5, 13.6): rows at 13.6/13.25/12.9/12.55 all inside.
-\begin{scope}[shift={(20.5, 13.6)}]
+% Center math: 4 cells × 0.4 = 1.6 wide; heatmap center = shift_x + 0.8.
+% Zone center x=21.5. shift_x was 20.5 → heatmap center 21.3 (off-left
+% by 0.2cm). Adjusted to 20.7 → heatmap center 21.5 ✓
+\begin{scope}[shift={(20.7, 13.6)}]
   \foreach \r in {0,...,3} {
     \foreach \c in {0,...,3} {
       \pgfmathtruncatemacro{\v}{int(mod(\r*\r+\c*3+2,5))}
@@ -341,11 +347,18 @@
 % ================================================================
 %  MDT FEEDBACK LOOP (red dashed, U-shaped along bottom)
 % ================================================================
+% Previous path had a DIAGONAL segment from (25.5, 7.75) to (-1.5, 4.0)
+% that cut DIRECTLY ACROSS the entire figure (visually crossing zones,
+% boxes, and arrows). Replaced with an orthogonal U-path that goes
+% DOWN past the AUC panel bottom (y=-0.25), LEFT to the far margin,
+% UP to clients level, then RIGHT into Pathology.
 \draw[feed_arrow, rounded corners=8pt, line width=1.2pt]
-    (mdt.south) -- ++(0, -1.0) -- (-1.5, 4.0) -- (-1.5, 10) -- (ct.west |- 0,10) -- (path.west);
+    (mdt.south) -- (25.5, -1.0) -- (-2.0, -1.0) -- (-2.0, 10) -- (path.west);
+% Label moved into the empty space along the bottom horizontal segment
+% (was at (12, 3.8) sitting on the old diagonal mid-point).
 \node[font=\footnotesize\bfseries, text=drawRedLine,
       fill=white, fill opacity=0.9, text opacity=1,
-      inner sep=3pt, rounded corners=2pt] at (12, 3.8) {MDT 反馈优化};
+      inner sep=3pt, rounded corners=2pt] at (12, -0.7) {MDT 反馈优化};
 
 % ================================================================
 %  STAGE LABELS (top)
@@ -394,11 +407,15 @@
 \end{pgfonlayer}
 
 % ================================================================
-%  DATA VOLUME ANNOTATION (top-right corner)
+%  DATA VOLUME ANNOTATION (centered under 阶段五 label)
 % ================================================================
+% Was anchor=north east at (27.0, 15.3) — pinned to right edge of Stage 5
+% zone. Stage 5 zone spans x=23.8..27.2 (center x=25.5). Changed to
+% anchor=north at (25.5, 15.3) so the box is centered horizontally
+% under the "阶段五" label (also at center x=25.5).
 \node[font=\scriptsize, text=drawGreyLine, fill=drawGreyFill!50,
       draw=drawGreyLine!40, rounded corners=3pt, inner sep=4pt,
-      anchor=north east] at (27.0, 15.3)
+      anchor=north] at (25.5, 15.3)
     {\shortstack[l]{3家三甲医院\\12,847例\\多中心数据集}};
 
 \end{tikzpicture}

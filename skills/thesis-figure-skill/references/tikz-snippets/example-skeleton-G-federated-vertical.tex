@@ -132,12 +132,16 @@
 % ================================================================
 %  EXPERIMENT RESULTS PANEL (bottom)
 % ================================================================
+% Panel resized: height 3.8 → 4.2 (center stays 1.7) so the panel spans
+% y=-0.4..3.8 (was -0.2..3.6). Previous panel top y=3.6 was EXACTLY at
+% the y-axis arrow tip (scope y=3.4 + shift y=0.20 = abs y=3.6) — the
+% arrowhead touched the panel border. New panel top y=3.8 gives 0.2cm
+% clearance. Title moved from y=3.7 → 3.9 to stay ABOVE the new panel
+% top (3.8).
 \node[rectangle, rounded corners=6pt, draw=drawBlueLine, fill=drawBlueFill!15,
-    minimum width=15cm, minimum height=3.2cm, thick, inner sep=0pt] (panel) at (6, 2.0) {};
-% Fix G.4: was anchor=north west at y=3.5 — INSIDE panel top y=3.6 by 0.1cm.
-% Move to anchor=south west at y=3.7 so title sits clearly ABOVE the panel.
+    minimum width=15cm, minimum height=4.2cm, thick, inner sep=0pt] (panel) at (6, 1.7) {};
 \node[font=\small\bfseries, text=drawBlueLine!80!black, anchor=south west]
-    at (-0.8, 3.7) {实验结果：三城市联合预测性能};
+    at (-0.8, 3.9) {实验结果：三城市联合预测性能};
 
 % Embedded bar chart
 % Fix G.6: was y-axis labeled 5/10/15/20 (max 20) but bar value labels
@@ -189,9 +193,11 @@
 % (color conflict + visually a "data point" inside the chart area).
 % Move OUTSIDE the panel (above it, anchor=south) and harmonize color
 % with the panel's blue theme so it reads as a summary annotation.
+% Moved 3.7 → 3.9 to stay above the resized panel top (now y=3.8) — same
+% as the title repositioning.
 \node[font=\footnotesize\bfseries, text=drawBlueLine!80!black,
       fill=drawBlueFill!40, draw=drawBlueLine!50, rounded corners=3pt,
-      inner sep=5pt, anchor=south west] at (9.0, 3.7)
+      inner sep=5pt, anchor=south west] at (9.0, 3.9)
     {数据不出域，隐私安全};
 
 % ================================================================
@@ -259,26 +265,37 @@
   % Aggregation zone
   \fill[drawRedFill!20, rounded corners=10pt] (-3.2, 14.7) rectangle (15.2, 18.3);
   \draw[drawRedLine!50, dashed, thick, rounded corners=10pt] (-3.2, 14.7) rectangle (15.2, 18.3);
-  % Training zone
-  \fill[drawGreenFill!20, rounded corners=10pt] (-3.2, 8.3) rectangle (15.2, 12.7);
-  \draw[drawGreenLine!50, dashed, thick, rounded corners=10pt] (-3.2, 8.3) rectangle (15.2, 12.7);
-  % Edge collection zone (wider to contain all sensors)
-  \fill[drawOrangeFill!20, rounded corners=10pt] (-3.2, 4.3) rectangle (15.2, 8.0);
-  \draw[drawOrangeLine!50, dashed, thick, rounded corners=10pt] (-3.2, 4.3) rectangle (15.2, 8.0);
+  % Training zone — bottom extended 8.3 → 8.6 so the 边缘采集层 chip
+  % above Edge zone (chip top at y=8.6) doesn't poke into Training zone.
+  \fill[drawGreenFill!20, rounded corners=10pt] (-3.2, 8.6) rectangle (15.2, 12.7);
+  \draw[drawGreenLine!50, dashed, thick, rounded corners=10pt] (-3.2, 8.6) rectangle (15.2, 12.7);
+  % Edge collection zone — bottom raised 4.3 → 4.6 to give the
+  % "实验结果" chart-panel title more vertical breathing room (was 0.3cm
+  % gap from title top y≈4.0 to zone dashed border at 4.3, now 0.6cm).
+  \fill[drawOrangeFill!20, rounded corners=10pt] (-3.2, 4.6) rectangle (15.2, 8.0);
+  \draw[drawOrangeLine!50, dashed, thick, rounded corners=10pt] (-3.2, 4.6) rectangle (15.2, 8.0);
 \end{pgfonlayer}
 
 % ================================================================
-%  ZONE LABELS (capsule style, inside top-left)
+%  ZONE LABELS (capsule style — all 3 chips OUTSIDE their zones above)
 % ================================================================
+% All three chips share the same style: anchor=south west placed JUST
+% ABOVE each zone's top border, with chip bottom touching zone top.
+% Previously 联邦聚合层 was anchor=north west INSIDE its zone at top-left,
+% while 本地训练层 / 边缘采集层 were anchor=south west ABOVE their zones
+% — inconsistent visual treatment. Now uniformly above-zone.
+% (本地训练层/边缘采集层 moved above to avoid overlap with City A / Prep
+% box content; Training zone bottom extended 8.3→8.6 to fit 边缘采集层
+% chip in the inter-zone gap.)
 \node[font=\footnotesize\bfseries, text=drawRedLine!80!black,
       fill=drawRedFill!60, draw=drawRedLine!40, rounded corners=3pt, inner sep=4pt,
-      anchor=north west] at (-2.7, 18.1) {联邦聚合层};
+      anchor=south west] at (-2.7, 18.35) {联邦聚合层};
 \node[font=\footnotesize\bfseries, text=drawGreenLine!80!black,
       fill=drawGreenFill!60, draw=drawGreenLine!40, rounded corners=3pt, inner sep=4pt,
-      anchor=north west] at (-2.7, 12.5) {本地训练层};
+      anchor=south west] at (-2.7, 12.75) {本地训练层};
 \node[font=\footnotesize\bfseries, text=drawOrangeLine!80!black,
-      fill=drawOrangeFill!60, draw=drawOrangeLine!40, rounded corners=3pt, inner sep=4pt,
-      anchor=north west] at (-2.7, 7.8) {边缘采集层};
+      fill=drawOrangeFill!60, draw=drawOrangeLine!40, rounded corners=3pt, inner sep=3pt,
+      anchor=south west] at (-2.7, 8.05) {边缘采集层};
 
 % ================================================================
 %  DECORATIVE — Iteration cycle annotation (right margin)

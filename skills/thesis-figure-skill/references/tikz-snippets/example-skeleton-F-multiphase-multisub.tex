@@ -119,13 +119,20 @@
 \node[orange_node, minimum width=3.2cm, minimum height=2.0cm] (partyC) at (8.5, 8.0)
     {\textbf{Party C}\\[1pt]{\footnotesize $x_C \in \mathbb{Z}_p$}\\[-1pt]{\scriptsize Enc$(pk, x_C) \to c_C$}};
 
-% Secret sharing visualization (small matrix inside each party)
-\foreach \party/\ybase/\col in {A/14.2/acaBlueLine, B/10.7/acaGreenLine, C/7.2/acaOrangeLine} {
+% Secret sharing visualization (small matrix BELOW each party box).
+% Previously placed INSIDE box at ybase=14.2/10.7/7.2 but overlapped
+% with the centered "Enc(pk, x_X) → c_X" formula at the bottom text
+% line. Moved outside to ybase=13.55/10.05/6.55 (just below each box's
+% bottom edge with 0.1cm gap). Centered horizontally under party at
+% x=8.5 (base x=7.8 + 3 boxes * 0.5 spacing = group center 8.5).
+% Requires Phase 2 zone bottom extended from y=6.5 to y=6.0 to contain
+% Party C's shares + label.
+\foreach \party/\ybase/\col in {A/13.55/acaBlueLine, B/10.05/acaGreenLine, C/6.55/acaOrangeLine} {
   \foreach \s in {0,1,2} {
-    \fill[\col!30] ({7.2+\s*0.5}, \ybase) rectangle ({7.2+\s*0.5+0.4}, {\ybase+0.35});
-    \draw[\col, thin] ({7.2+\s*0.5}, \ybase) rectangle ({7.2+\s*0.5+0.4}, {\ybase+0.35});
+    \fill[\col!30] ({7.8+\s*0.5}, \ybase) rectangle ({7.8+\s*0.5+0.4}, {\ybase+0.35});
+    \draw[\col, thin] ({7.8+\s*0.5}, \ybase) rectangle ({7.8+\s*0.5+0.4}, {\ybase+0.35});
   }
-  \node[font=\tiny, text=\col] at (7.9, {\ybase-0.2}) {shares};
+  \node[font=\tiny, text=\col] at (8.5, {\ybase-0.2}) {shares};
 }
 
 % ================================================================
@@ -150,17 +157,12 @@
 \draw[arrow] (garbled.south) -- (ot.north);
 \draw[arrow] (ot.south) -- (eval.north);
 
-% Embedded gate count mini-chart
-% Fix F.3: was shift=(13.3, 7.8) with label at y=7.6 — outside Phase 3
-% core box bottom y=7.75. Moved up to (13.3, 8.0) so label at y=7.8 is
-% just above box bottom (7.75) — fully inside.
-\begin{scope}[shift={(13.3, 8.0)}]
-  \fill[acaPurpleLine!60] (0.0, 0) rectangle (0.3, 0.8);
-  \fill[acaPurpleLine!45] (0.4, 0) rectangle (0.7, 1.2);
-  \fill[acaPurpleLine!30] (0.8, 0) rectangle (1.1, 0.6);
-  \fill[acaPurpleLine!70] (1.2, 0) rectangle (1.5, 1.5);
-  \node[font=\tiny, text=acaPurpleLine] at (0.75, -0.2) {Gate count};
-\end{scope}
+% Gate count mini-chart REMOVED. It was at shift (14.25, 8.0) with bars
+% reaching y=9.5, which OVERLAPPED the Circuit Evaluation box (spans
+% y=8.75..10.25) and its "y = Eval(C̃, x̃)" formula. The MPC engine
+% box height (7.5cm) didn't have enough vertical room to fit a 4th
+% visualization without overlap. Removed the chart entirely to keep
+% Garbled / OT / Eval text legible.
 
 % ================================================================
 %  Phase 4: Output & Verification (x=19~23)
@@ -171,16 +173,24 @@
 \node[teal_node, minimum width=3.5cm, minimum height=2.0cm] (verify) at (20.5, 10.5)
     {\textbf{ZK Verification}\\[1pt]{\footnotesize $\pi \leftarrow \mathrm{Prove}(y, w)$}\\[-1pt]{\scriptsize $\mathrm{Verify}(\pi, y) = 1$}};
 
-% Performance panel
+% Performance panel — width shrunk 4.0 → 3.6cm so the box edges don't
+% hug the Phase 4 zone right border (zone spans x=18.5..22.5; previous
+% box edges at exactly x=18.5/22.5 = zone edges). Now box edges at
+% x=18.7/22.3 with 0.2cm margin on each side.
 \node[rectangle, rounded corners=5pt, draw=acaBlueLine, fill=acaBlueFill!30,
-      minimum width=4.0cm, minimum height=3.0cm, thick] (perf) at (20.5, 6.5) {};
+      minimum width=3.6cm, minimum height=3.0cm, thick] (perf) at (20.5, 6.5) {};
 \node[font=\scriptsize\bfseries, text=acaBlueLine!80!black] at (20.5, 7.7) {Performance};
 
 % Mini bar chart — wider bar spacing (0.95cm) so "Latency" label
-% doesn't overlap "Comm" / "Proof" labels (was 0.7cm gap → overlap)
-\begin{scope}[shift={(18.8, 5.3)}]
+% doesn't overlap "Comm" / "Proof" labels (was 0.7cm gap → overlap).
+% Shift y was 5.3 → labels at abs y=5.1, only 0.1cm above box bottom y=5.0.
+% Raised to 5.55 → labels at abs y=5.35, 0.35cm margin from box bottom.
+% X-axis right end was at scope x=3.6 (abs x=22.4) — overflowed the box
+% right edge at x=22.3 (after width shrink 4.0→3.6). Shortened to 3.3
+% (abs x=22.1) so the arrow tip sits 0.2cm inside the box.
+\begin{scope}[shift={(18.8, 5.55)}]
   \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.2, 0) -- (0.2, 2.0);
-  \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.2, 0) -- (3.6, 0);
+  \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.2, 0) -- (3.3, 0);
   \fill[barBlue, rounded corners=1pt] (0.55, 0) rectangle (1.05, 1.6);
   \fill[barGreen, rounded corners=1pt] (1.50, 0) rectangle (2.00, 1.2);
   \fill[barOrange, rounded corners=1pt] (2.45, 0) rectangle (2.95, 0.4);
@@ -219,43 +229,60 @@
 %  ZONE BACKGROUNDS
 % ================================================================
 \begin{pgfonlayer}{background}
-  \fill[zonePurpleBg, rounded corners=10pt] (0.2, 7.5) rectangle (5.0, 16.0);
-  \draw[acaPurpleLine!25, thick, rounded corners=10pt] (0.2, 7.5) rectangle (5.0, 16.0);
+  % All four zones now share top y=16.5 so all four phase chips at y=16.8
+  % sit uniformly 0.3cm above their respective zone tops (was a mix of
+  % 16.0/16.5).
+  %
+  % Phase 1 bottom 6.0 contains Security note at (0.5, 6.2).
+  \fill[zonePurpleBg, rounded corners=10pt] (0.2, 6.0) rectangle (5.0, 16.5);
+  \draw[acaPurpleLine!25, thick, rounded corners=10pt] (0.2, 6.0) rectangle (5.0, 16.5);
 
-  \fill[zoneBlueBg, rounded corners=10pt] (5.8, 6.5) rectangle (11.2, 16.5);
-  \draw[acaBlueLine!25, thick, rounded corners=10pt] (5.8, 6.5) rectangle (11.2, 16.5);
+  % Phase 2 bottom 6.0 contains Party C's external shares matrix.
+  \fill[zoneBlueBg, rounded corners=10pt] (5.8, 6.0) rectangle (11.2, 16.5);
+  \draw[acaBlueLine!25, thick, rounded corners=10pt] (5.8, 6.0) rectangle (11.2, 16.5);
 
-  \fill[zoneRedBg, rounded corners=10pt] (11.8, 7.0) rectangle (18.2, 16.0);
-  \draw[acaRedLine!25, thick, rounded corners=10pt] (11.8, 7.0) rectangle (18.2, 16.0);
+  \fill[zoneRedBg, rounded corners=10pt] (11.8, 7.0) rectangle (18.2, 16.5);
+  \draw[acaRedLine!25, thick, rounded corners=10pt] (11.8, 7.0) rectangle (18.2, 16.5);
 
-  \fill[zoneGreenBg, rounded corners=10pt] (18.5, 4.5) rectangle (22.5, 16.0);
-  \draw[acaTealLine!25, thick, rounded corners=10pt] (18.5, 4.5) rectangle (22.5, 16.0);
+  \fill[zoneGreenBg, rounded corners=10pt] (18.5, 4.5) rectangle (22.5, 16.5);
+  \draw[acaTealLine!25, thick, rounded corners=10pt] (18.5, 4.5) rectangle (22.5, 16.5);
 \end{pgfonlayer}
 
 % ================================================================
-%  PHASE LABELS
+%  PHASE LABELS — uniform geometry
 % ================================================================
+% Previous mix: Phase 2 zone top was 16.5 (chip at 16.3 INSIDE that zone),
+% Phase 1/3/4 zone tops were 16.0 (chips at 16.3 ABOVE those zones). The
+% inconsistent y-relationship made Phase 2 chip look "sitting inside" the
+% zone while the others "floated above". Fixed by:
+%   - all four zones get top y=16.5 (uniform)
+%   - all four chips placed at y=16.8 (above zones with 0.3cm gap)
 \node[font=\footnotesize\bfseries, fill=acaPurpleFill!80, draw=acaPurpleLine!50,
       rounded corners=3pt, inner sep=4pt, text=acaPurpleLine!80!black]
-      at (2.5, 16.3) {Phase 1: Setup};
+      at (2.5, 16.8) {Phase 1: Setup};
 \node[font=\footnotesize\bfseries, fill=acaBlueFill!80, draw=acaBlueLine!50,
       rounded corners=3pt, inner sep=4pt, text=acaBlueLine!80!black]
-      at (8.5, 16.3) {Phase 2: Input Encryption};   % Fix F.2: was 16.8 → 0.5cm higher than other 3 phase chips
+      at (8.5, 16.8) {Phase 2: Input Encryption};
 \node[font=\footnotesize\bfseries, fill=acaRedFill!80, draw=acaRedLine!50,
       rounded corners=3pt, inner sep=4pt, text=acaRedLine!80!black]
-      at (15, 16.3) {Phase 3: Secure Computation};
+      at (15, 16.8) {Phase 3: Secure Computation};
 \node[font=\footnotesize\bfseries, fill=acaTealFill!80, draw=acaTealLine!50,
       rounded corners=3pt, inner sep=4pt, text=acaTealLine!80!black]
-      at (20.5, 16.3) {Phase 4: Output};
+      at (20.5, 16.8) {Phase 4: Output};
 
 % ================================================================
 %  SECURITY ANNOTATION
 % ================================================================
-% Fix F.1: Security note was anchor=north west at (0.5, 7.2) — outside
-% Phase 1 zone bottom (y=7.5). Move INTO Phase 1 zone bottom area:
-% anchor=south west at (0.5, 7.6) places note at bottom of Phase 1 zone.
+% Position history:
+%   - originally anchor=north west at (0.5, 7.2): outside Phase 1 zone
+%   - then anchor=south west at (0.5, 7.6): inside zone BUT OVERLAPPED
+%     the CRS Setup box (y=8.25..9.75) since the note extends up from
+%     y=7.6 to y≈8.9, well into CRS range.
+%   - NOW anchor=south west at (0.5, 6.2): clearly BELOW CRS Setup
+%     bottom (8.25), note spans y=6.2..7.5 with 0.75cm gap to CRS.
+%     Requires Phase 1 zone bottom extended to y=6.0.
 \node[font=\scriptsize, text=acaRedLine, fill=acaRedFill!50, draw=acaRedLine!40,
-      rounded corners=3pt, inner sep=4pt, anchor=south west] at (0.5, 7.6)
+      rounded corners=3pt, inner sep=4pt, anchor=south west] at (0.5, 6.2)
     {\shortstack[l]{Security: $\lambda = 128$ bits\\Semi-honest model\\UC-secure}};
 
 \end{tikzpicture}
