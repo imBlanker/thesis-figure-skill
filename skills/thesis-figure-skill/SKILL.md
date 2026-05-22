@@ -78,34 +78,31 @@ description: |
 
 **审美 + 信息密度 > 规则合规。** 规则只是地板，审美是天花板。**18 项 checklist 是 catching last-mile bugs**——不是设计指南。设计指南是上面的 Philosophy。
 
-### 复杂档画图捷径 — TikZ Snippet Library
+### 复杂档画图捷径 — TikZ Snippet Library（21 个 + 预览 PNG）
 
 **Batch 17 fig153 教训**：Philosophy 文本指南让 sub-agent **知道要嵌入 viz / panel / 公式**，但**写出来的视觉重量、留白、配色协调仍然失败**——因为这些是 visual perception 而非 textual 任务。
 
-**解决方案**：`references/tikz-snippets/` 提供 **11 个手工精雕的 TikZ 片段 + 1 个组合规则文档**——sub-agent **复制粘贴 + 替换参数 + 按组合规则拼装**即可达到 examples 标杆：
+**解决方案**：`references/tikz-snippets/` 提供 **21 个手工精雕的 TikZ 片段 + 21 个 PNG 预览 + 1 个组合规则文档**——sub-agent **看 PNG 选 + 复制粘贴 + 替换参数 + 按组合规则拼装**即可达到 examples 标杆。
 
-**零件**（手工精雕）：
-- `attention-heatmap.tex` — N×N 热力图 + colorbar
-- `bar-chart.tex` — benchmark 柱状图 + grid
-- `hyperparams-table.tex` — 参数表
-- `multi-zone-palette.tex` — 6 色 zone tone palette
-- `pipeline-stages.tex` — N-stage 水平管线
-- `formula-box.tex` — 公式 box 3 种 variant
-- **`stage-container.tex`** ⭐ — stage 容器（标题 + zone + anchor），自带 self-contained 模块
-- **`color-legend.tex`** ⭐ — 底部 N 色 legend strip
-- **`summary-bar.tex`** ⭐ — 底部 pipeline summary bar（箭头连接 stages）
-- **`embedded-graph.tex`** ⭐ — 真实 graph viz (star/cycle pattern)
-- **`scatter-plot.tex`** ⭐ — 散点图（predicted vs actual + R²）
+**5 大类零件**（详见 `references/tikz-snippets/README.md` inline gallery）：
 
-**组合规则**（**必读**）：
-- **`COMPOSITION-RULES.md`** — snippet 间留白 / 对齐 / Z-order / 整图骨架（双栏对称 / 5 stage 横向 / 中央 hero + 4 panels）
+| 类别 | 数量 | 文件 |
+|---|---|---|
+| **1. 嵌入数据可视化** | 6 | attention-heatmap / confusion-matrix / mini-spectrogram / image-strip / scatter-plot / embedded-graph |
+| **2. 信息 panel / 图表** | 5 | bar-chart / line-chart / radar-chart / hyperparams-table / metrics-card |
+| **3. 数学 / 几何** | 3 | gaussian-curve / vector-arrows / formula-box |
+| **4. 结构 / 流程** | 4 | stage-container / pipeline-stages / layer-stack / feedback-loop |
+| **5. 整图骨架元素** | 3 | multi-zone-palette / color-legend / summary-bar |
 
-**复杂档强制**：
-1. 拼装 ≥ 3 个 snippet（不是从零写）
-2. **必读 `COMPOSITION-RULES.md`**（解决 fig153 v3 的"snippets 都塞进去但仍乱"问题）
-3. 选 A/B/C 三种骨架之一（不要自创随机布局）
-4. 底部必有 color-legend OR summary-bar
-5. **绝对不能"简化"snippet 核心结构**——简化 = 信息稀疏 = 平庸
+**组合规则**（**必读**）：`COMPOSITION-RULES.md` — snippet 间留白 / 对齐 / Z-order / 整图骨架（双栏对称 / 5 stage 横向 / 中央 hero + 4 panels）
+
+**复杂档强制流程**：
+1. **先读 `references/tikz-snippets/README.md`** —— inline gallery 含每个 snippet 的 PNG 预览
+2. **看 PNG 选 ≥ 3 snippet** —— 视觉决定，不是文字想象
+3. **必读 `COMPOSITION-RULES.md`** —— 解决"snippets 都塞进去但仍乱"问题
+4. **选 A/B/C 三种骨架之一** —— 不要自创随机布局
+5. **底部必有** color-legend OR summary-bar
+6. **绝对不能"简化"snippet 核心结构** —— 简化 = 信息稀疏 = 平庸
 
 ## 硬约束（违反必失败）
 
