@@ -196,7 +196,9 @@
 % ================================================================
 %  SECURITY ANALYSIS (top-right, radar chart)
 % ================================================================
-\node[font=\small\bfseries, text=acaTealLine, anchor=north west] at (19.5, 19.5)
+% Title anchored center, placed clearly above radar — avoids overlap
+% with the Strength axis label which sits at the 90° (top) of the radar.
+\node[font=\small\bfseries, text=acaTealLine, anchor=south] at (21.5, 19.7)
     {Security Analysis};
 
 % Radar chart (6 axes)
@@ -271,7 +273,7 @@
   \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.3, 0) -- (0.3, 3.8);
   \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.3, 0) -- (5.8, 0);
   \node[font=\tiny, text=acaGreyLine, rotate=90, anchor=south] at (0.0, 1.9) {Accuracy (\%)};
-  \node[font=\tiny, text=acaGreyLine] at (3.0, -0.3) {Communication Rounds};
+  \node[font=\tiny, text=acaGreyLine] at (3.0, -0.55) {Communication Rounds};
   % Y ticks
   \foreach \y/\lab in {0.0/70, 0.95/75, 1.9/80, 2.85/85, 3.5/92} {
     \node[font=\tiny, left, text=acaGreyLine] at (0.25, \y) {\lab};
@@ -332,8 +334,8 @@
   \draw[-{Stealth[scale=0.6]}, very thick, acaTealLine] (2.5, 3.5) -- (2.5, 1.3);
   \node[font=\scriptsize\bfseries, text=acaTealLine, fill=white, inner sep=2pt]
       at (2.5, 2.4) {65\% $\downarrow$};
-  % CKKS packing annotation
-  \node[font=\tiny, text=acaTealLine, anchor=west] at (3.0, 3.2)
+  % CKKS packing annotation — needs align=center for \\ linebreak
+  \node[font=\tiny, text=acaTealLine, anchor=west, align=center] at (3.0, 3.2)
       {CKKS packing\\reduces size};
 \end{scope}
 

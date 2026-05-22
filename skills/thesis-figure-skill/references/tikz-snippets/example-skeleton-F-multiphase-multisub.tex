@@ -173,19 +173,20 @@
       minimum width=4.0cm, minimum height=3.0cm, thick] (perf) at (20.5, 6.5) {};
 \node[font=\scriptsize\bfseries, text=acaBlueLine!80!black] at (20.5, 7.7) {Performance};
 
-% Mini bar chart
-\begin{scope}[shift={(19.0, 5.3)}]
+% Mini bar chart — wider bar spacing (0.95cm) so "Latency" label
+% doesn't overlap "Comm" / "Proof" labels (was 0.7cm gap → overlap)
+\begin{scope}[shift={(18.8, 5.3)}]
   \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.2, 0) -- (0.2, 2.0);
-  \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.2, 0) -- (3.2, 0);
-  \fill[barBlue, rounded corners=1pt] (0.5, 0) rectangle (1.0, 1.6);
-  \fill[barGreen, rounded corners=1pt] (1.2, 0) rectangle (1.7, 1.2);
-  \fill[barOrange, rounded corners=1pt] (1.9, 0) rectangle (2.4, 0.4);
-  \node[font=\tiny] at (0.75, -0.2) {Latency};
-  \node[font=\tiny] at (1.45, -0.2) {Comm};
-  \node[font=\tiny] at (2.15, -0.2) {Proof};
-  \node[font=\tiny\bfseries, text=barBlue] at (0.75, 1.75) {2.3s};
-  \node[font=\tiny\bfseries, text=barGreen] at (1.45, 1.35) {1.2MB};
-  \node[font=\tiny\bfseries, text=barOrange] at (2.15, 0.55) {288B};
+  \draw[-{Stealth[scale=0.5]}, acaGreyLine] (0.2, 0) -- (3.6, 0);
+  \fill[barBlue, rounded corners=1pt] (0.55, 0) rectangle (1.05, 1.6);
+  \fill[barGreen, rounded corners=1pt] (1.50, 0) rectangle (2.00, 1.2);
+  \fill[barOrange, rounded corners=1pt] (2.45, 0) rectangle (2.95, 0.4);
+  \node[font=\tiny] at (0.8, -0.2) {Latency};
+  \node[font=\tiny] at (1.75, -0.2) {Comm};
+  \node[font=\tiny] at (2.7, -0.2) {Proof};
+  \node[font=\tiny\bfseries, text=barBlue] at (0.8, 1.75) {2.3s};
+  \node[font=\tiny\bfseries, text=barGreen] at (1.75, 1.35) {1.2MB};
+  \node[font=\tiny\bfseries, text=barOrange] at (2.7, 0.55) {288B};
 \end{scope}
 
 % ================================================================

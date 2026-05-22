@@ -178,7 +178,7 @@
   \node[font=\tiny] at (1.5, -0.2) {细};
   \node[font=\tiny, left, text=drawGreyLine] at (-0.05, 1.0) {50};
   \node[font=\tiny, left, text=drawGreyLine] at (-0.05, 2.0) {100};
-  \node[font=\tiny, text=drawGreyLine] at (1.4, -0.5) {\scriptsize 准确率(\%)};
+  \node[font=\tiny, text=drawGreyLine] at (1.4, -0.7) {\scriptsize 准确率(\%)};
 \end{scope}
 
 % Hierarchical arrow between coarse and fine
@@ -279,11 +279,12 @@
       (5.8, 0.0) rectangle (6.8, 2.0); % 0.943
   \node[font=\scriptsize\bfseries, text=barRed!80!black] at (6.3, 2.13) {0.943};
   \node[font=\scriptsize\bfseries] at (6.3, -0.25) {MedFusion};
-  % Improvement annotation
+  % Improvement annotation — placed further right (8.5 instead of 8.2)
+  % so "↑5.8% vs CT" doesn't crowd the "0.943" value label above the bar
   \draw[-{Stealth[scale=0.5]}, very thick, drawRedLine]
-      (7.2, 1.87) -- (7.2, 2.0);
-  \node[font=\scriptsize\bfseries, text=drawRedLine, fill=white, inner sep=1pt]
-      at (8.2, 1.95) {$\uparrow$5.8\% vs CT};
+      (7.3, 1.4) -- (7.3, 1.9);
+  \node[font=\scriptsize\bfseries, text=drawRedLine, anchor=west]
+      at (7.4, 1.65) {$\uparrow$5.8\% vs CT};
 \end{scope}
 
 % Legend for AUC panel
