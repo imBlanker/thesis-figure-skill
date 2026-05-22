@@ -82,7 +82,10 @@
 \zonetitle{acaTealLine}{0}{9.5}{9.5}{Hyperparameters}
 
 % Table at x=[0.4, 9.1], y=[6.3, 8.7]
-\def\xLU{0.4}\def\yLU{8.7}\def\rowH{0.27}\def\colW{8.7}
+% Fix: was rowH=0.27 with inner-pad 0.15 — labels too close to table
+% border (cramped). rowH=0.28 gives 9*0.28=2.52cm tab height (fits zone
+% y=[6.0, 9.5]) with 0.18cm zone padding. Inner-pad 0.15→0.30cm.
+\def\xLU{0.4}\def\yLU{8.7}\def\rowH{0.28}\def\colW{8.7}
 \def\tabdata{%
   Architecture/Transformer,%
   Layers/24,%
@@ -107,9 +110,9 @@
     \fill[acaTealBg!50] (\xLU, \ypos - \rowH) rectangle (\xLU + \colW, \ypos);
   \fi
   \node[anchor=west, font=\scriptsize, color=acaGreyLine]
-    at (\xLU + 0.15, \ypos - \rowH/2) {\k};
+    at (\xLU + 0.30, \ypos - \rowH/2) {\k};
   \node[anchor=east, font=\scriptsize\bfseries, color=acaTealLine]
-    at (\xLU + \colW - 0.15, \ypos - \rowH/2) {\v};
+    at (\xLU + \colW - 0.30, \ypos - \rowH/2) {\v};
 }
 
 % =====================================================================
@@ -172,7 +175,9 @@
 }
 
 % Middle: attention heatmap at x=[8.5, 12.5]
-\def\xH{8.5}\def\yH{4.7}\def\cs{0.4}\def\N{8}
+% Fix: was yH=4.7 → heatmap bottom y=1.5 (= hero zone bottom!), heatmap
+% pixels touching zone border. yH=5.0 → bottom y=1.8 (0.3cm padding).
+\def\xH{8.5}\def\yH{5.0}\def\cs{0.4}\def\N{8}
 \foreach \i in {1,...,\N} {
   \foreach \j in {1,...,\N} {
     \pgfmathsetmacro\val{exp(-abs(\i-\j)/2.5)*100}
