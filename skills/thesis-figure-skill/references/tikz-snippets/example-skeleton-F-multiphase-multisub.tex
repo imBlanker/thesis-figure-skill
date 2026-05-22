@@ -67,36 +67,69 @@
 \usepackage{amsmath,amssymb}
 \usetikzlibrary{shapes, arrows.meta, positioning, fit, backgrounds, calc, shadows, shapes.geometric}
 
-% ===== 学术配色（新默认） =====
-\definecolor{acaBlueLine}{HTML}{6080B0}      \definecolor{acaBlueFill}{HTML}{DBEAFE}
-\definecolor{acaGreenLine}{HTML}{30A060}     \definecolor{acaGreenFill}{HTML}{A0D0A0}
-\definecolor{acaOrangeLine}{HTML}{D06020}    \definecolor{acaOrangeFill}{HTML}{FFE6CC}
-\definecolor{acaPurpleLine}{HTML}{6020D0}    \definecolor{acaPurpleFill}{HTML}{E1D5E7}
-\definecolor{acaRedLine}{HTML}{B05050}       \definecolor{acaRedFill}{HTML}{F8CECC}
-\definecolor{acaGreyLine}{HTML}{666666}      \definecolor{acaGreyFill}{HTML}{F5F5F5}
-\definecolor{acaGoldLine}{HTML}{D09000}      \definecolor{acaGoldFill}{HTML}{F8F8E0}
-\definecolor{acaTealLine}{HTML}{009060}      \definecolor{acaTealFill}{HTML}{D1FAE5}
-\definecolor{acaCyanLine}{HTML}{00B0D0}      \definecolor{acaCyanFill}{HTML}{E0F7FA}
-\definecolor{acaPinkLine}{HTML}{D06090}      \definecolor{acaPinkFill}{HTML}{FCE4EC}
-\definecolor{acaYellowLine}{HTML}{E0C060}    \definecolor{acaYellowFill}{HTML}{FFF8E1}
-\definecolor{acaLimeLine}{HTML}{80B060}      \definecolor{acaLimeFill}{HTML}{E8F5E9}
-% Zone 背景
+% =====================================================================
+% STYLE PRESET: Academic Professional (default)
+% =====================================================================
+% F's color identity:
+%   primary=blue (Phase 1 setup), hero=purple (Phase 2 encryption),
+%   accent=teal (lightly-used signal accents), success=green (Phase 4
+%   output), data_curve=orange (Phase 3 compute outputs), warning=red,
+%   neutral=grey. 4 bar colors + 4-stop heatmap + bg.
+%
+% F-INTERNAL signal colors (NOT preset-controlled, stay across styles):
+%   Gold/Cyan/Pink/Yellow/Lime — lightly-used (2 refs each) for specific
+%   protocol signal annotations within Phase 3/4 that should keep visual
+%   identity. 5 zone backgrounds also stay hardcoded (bound to phase).
+%
+% Swap style by replacing PRESET DEFINITION block only.
+% See references/style-presets/README.md for token semantics.
+% =====================================================================
+
+% ----- BEGIN PRESET DEFINITION -----
+\definecolor{c_primary_line}{HTML}{6080B0}       \definecolor{c_primary_fill}{HTML}{DBEAFE}
+\definecolor{c_hero_line}{HTML}{6020D0}          \definecolor{c_hero_fill}{HTML}{E1D5E7}
+\definecolor{c_accent_line}{HTML}{009060}        \definecolor{c_accent_fill}{HTML}{D1FAE5}
+\definecolor{c_success_line}{HTML}{30A060}       \definecolor{c_success_fill}{HTML}{A0D0A0}
+\definecolor{c_data_curve_line}{HTML}{D06020}    \definecolor{c_data_curve_fill}{HTML}{FFE6CC}
+\definecolor{c_warning_line}{HTML}{B05050}       \definecolor{c_warning_fill}{HTML}{F8CECC}
+\definecolor{c_neutral_line}{HTML}{666666}       \definecolor{c_neutral_fill}{HTML}{F5F5F5}
+\definecolor{c_bar_1}{HTML}{3080C0}              \definecolor{c_bar_2}{HTML}{30A060}
+\definecolor{c_bar_3}{HTML}{D06020}              \definecolor{c_bar_4}{HTML}{E03030}
+\definecolor{c_heat_5}{HTML}{401090}             \definecolor{c_heat_4}{HTML}{6020D0}
+\definecolor{c_heat_3}{HTML}{8B5CF6}             \definecolor{c_heat_2}{HTML}{C4B5FD}
+\definecolor{c_heat_bg}{HTML}{EDE9FE}
+% ----- END PRESET DEFINITION -----
+
+% ----- BEGIN BACKWARDS-COMPAT ALIASES (DO NOT EDIT) -----
+\colorlet{acaBlueLine}{c_primary_line}           \colorlet{acaBlueFill}{c_primary_fill}
+\colorlet{acaPurpleLine}{c_hero_line}            \colorlet{acaPurpleFill}{c_hero_fill}
+\colorlet{acaTealLine}{c_accent_line}            \colorlet{acaTealFill}{c_accent_fill}
+\colorlet{acaGreenLine}{c_success_line}          \colorlet{acaGreenFill}{c_success_fill}
+\colorlet{acaOrangeLine}{c_data_curve_line}      \colorlet{acaOrangeFill}{c_data_curve_fill}
+\colorlet{acaRedLine}{c_warning_line}            \colorlet{acaRedFill}{c_warning_fill}
+\colorlet{acaGreyLine}{c_neutral_line}           \colorlet{acaGreyFill}{c_neutral_fill}
+\colorlet{barBlue}{c_bar_1}                      \colorlet{barGreen}{c_bar_2}
+\colorlet{barOrange}{c_bar_3}                    \colorlet{barRed}{c_bar_4}
+\colorlet{heatDeep}{c_heat_5}                    \colorlet{heatDark}{c_heat_4}
+\colorlet{heatMid}{c_heat_3}                     \colorlet{heatLight}{c_heat_2}
+\colorlet{heatBg}{c_heat_bg}
+% ----- END BACKWARDS-COMPAT ALIASES -----
+
+% F-internal signal colors (NOT aliased — these stay across style swaps
+% for protocol annotation consistency):
+\definecolor{acaGoldLine}{HTML}{D09000}          \definecolor{acaGoldFill}{HTML}{F8F8E0}
+\definecolor{acaCyanLine}{HTML}{00B0D0}          \definecolor{acaCyanFill}{HTML}{E0F7FA}
+\definecolor{acaPinkLine}{HTML}{D06090}          \definecolor{acaPinkFill}{HTML}{FCE4EC}
+\definecolor{acaYellowLine}{HTML}{E0C060}        \definecolor{acaYellowFill}{HTML}{FFF8E1}
+\definecolor{acaLimeLine}{HTML}{80B060}          \definecolor{acaLimeFill}{HTML}{E8F5E9}
+
+% F-internal zone background colors (NOT aliased — each is bound to a
+% specific phase's identity):
 \definecolor{zoneBlueBg}{HTML}{E0E0F8}
 \definecolor{zoneGreenBg}{HTML}{ECFDF5}
 \definecolor{zonePurpleBg}{HTML}{F5F3FF}
 \definecolor{zoneRedBg}{HTML}{F8E0E0}
 \definecolor{zoneYellowBg}{HTML}{F8F0C0}
-% 热力图
-\definecolor{heatDeep}{HTML}{401090}
-\definecolor{heatDark}{HTML}{6020D0}
-\definecolor{heatMid}{HTML}{8B5CF6}
-\definecolor{heatLight}{HTML}{C4B5FD}
-\definecolor{heatBg}{HTML}{EDE9FE}
-% 数据图表
-\definecolor{barBlue}{HTML}{3080C0}
-\definecolor{barGreen}{HTML}{30A060}
-\definecolor{barOrange}{HTML}{D06020}
-\definecolor{barRed}{HTML}{E03030}
 
 \pgfdeclarelayer{background}
 \pgfsetlayers{background,main}
