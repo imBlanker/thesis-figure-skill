@@ -1,6 +1,6 @@
 # Style Presets — Token-Based Visual Identity Swapping
 
-> Part of Phase 2 — see `../../ROADMAP.md`. Lets sub-agents pick `style × structure` independently.
+> Lets sub-agents pick `style × structure` independently — colors are abstracted via tokens, so swapping a preset changes the entire visual identity without touching body code.
 
 ## How it works
 
@@ -38,8 +38,8 @@ Below that block is a **BACKWARDS-COMPAT ALIASES** block that maps the legacy co
 |---|---|---|
 | **Academic Professional** (default) | `preset-academic.tex` | Soft pastel fills, mid-saturation strokes, drop shadows. Mainstream journal aesthetic. |
 | **Brutalism / High Contrast** | `preset-brutalism.tex` | Pure B&W with a single bright accent (yellow). No shadows, thick borders ideally (but borders are controlled by `base_box` style, not by tokens). |
-| **Editorial / Magazine** | (Phase 2 — TODO) | Single accent + grey + lots of whitespace |
-| **Light Luxury** | (Phase 2 — TODO) | Pastels + hairlines + refined typography |
+| **Editorial / Magazine** | (TODO) | Single accent + grey + lots of whitespace |
+| **Light Luxury** | (TODO) | Pastels + hairlines + refined typography |
 
 ## Workflow for sub-agent in Mode A
 
@@ -52,6 +52,6 @@ Below that block is a **BACKWARDS-COMPAT ALIASES** block that maps the legacy co
 
 ## Caveats
 
-- Tokens cover **colors only**. Style attributes like border thickness, drop shadow opacity, corner radius are controlled by the `base_box` / arrow `.style` definitions in the tikzpicture — these are NOT yet token-ized. Phase 2.5 work.
+- Tokens cover **colors only**. Style attributes like border thickness, drop shadow opacity, corner radius are controlled by the `base_box` / arrow `.style` definitions in the tikzpicture — these are NOT yet token-ized.
 - The `\colorlet` aliasing means `acaBlueLine!70!black` still works because xcolor's `!N!c` mix operator works on any registered color name, whether defined via `\definecolor` or `\colorlet`.
 - Brutalism radar polygons may visually merge because both polygons use shades of black — semantic limitation worth noting.
