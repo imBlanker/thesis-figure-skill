@@ -959,3 +959,39 @@
 - **问题/发现**：RoPE viz 中心=(4.75,5.2), width=2.8cm → x范围[3.35,6.15]；GQA viz 中心=(7.65,5.2), width=3.0cm → x范围[6.15,9.15]。两个 viz 的 x 范围在 6.15 重合 → node-overlap。
 - **解决方案**：放置 embedded viz 前先算出 (center_x ± half_width) 范围，确保两个 viz 之间间隙 ≥ 0.3cm。
 - **发现日期**：2026-05-22
+
+#### [数据可视化] - 热力图格子在 background layer 被可视化框填充色覆盖
+
+- **问题/发现**：在 `\begin{pgfonlayer}{background}` 中绘制热力图格子（`\fill[heatDeep] ... rectangle`），同时用 `\node[viz_box, fill=zoneBlueBg]` 定义可视化框，框的背景填充覆盖了热力图格子（TikZ background layer 按代码顺序绘制）。渲染结果：heatmap 区域一片空白。
+- **解决方案**：不用 `\node[viz_box, fill=...]` 定义可视化框，改用 `\draw[fill=..., draw=...]` 手动绘制框轮廓（置于 main layer），然后热力图格子用普通代码（main layer）绘制在框轮廓之后。这样格子永远在框背景色上方。核心规则：**热力图/柱状图等嵌入可视化必须在 main layer 绘制，不要放入 background layer**。
+- **发现日期**：2026-05-22
+
+#### [数据流水线图] - 柱状图 y 轴 scale 需所有面板统一
+
+- **问题/发现**：RLHF 图中 3 个 benchmark 面板用了不同的 y 轴 scale（0-60% 对应不同 bar 高度），数值标签出现在轴线上方甚至溢出到图外，导致 text-overlap 和 text-overflow 错误。
+- **解决方案**：多个并排柱状图面板必须用**统一的 y 轴 scale**（如 0-80%，统一换算公式 `height = value/max_val * axis_height`）。这不仅消除溢出错误，也让面板之间的比较更直观。
+- **发现日期**：2026-05-22
+
+#### [嵌入 viz] - hero 框内嵌入迷你 bar chart 位置需避开 sub-node
+
+- **问题/发现**：RM hero 框内放了嵌入迷你 bar chart，初始 y 坐标与 sub-node (rmScore, rmEnc) 重叠，导致 text-overlap 错误（bar 标签与 sub-node 文字撞在一起）。
+- **解决方案**：hero 框内有多个 sub-node 时，嵌入可视化应放在 sub-node **之间的空白区域**（x 和 y 都错开）。提前规划 hero 框内各元素的 x/y 坐标，留出迷你图的位置。
+- **发现日期**：2026-05-22
+
+#### [通用] - `\foreach` 内使用 xcolor 颜色名变量必定失败
+
+- **问题/发现**：AlphaFold 图中氨基酸序列条用 `\foreach \col in {barBlue,...}` 循环，xcolor 无法在 `\foreach` 展开中解析多 token 颜色名（如 `barGreen`、`acaBlueLine`），触发 `! Package xcolor Error: Undefined color 'barGreen '`（注意末尾有空格）。同样问题出现在分子图原子颜色循环中。
+- **解决方案**：凡是需要逐元素使用不同颜色的场合，**放弃 `\foreach` 循环，改为每个元素单独写 `\fill[barBlue!70,...] ... \node[...] {M};`**。代码量增加但编译稳定。共用颜色的循环（所有元素同色）不受影响。
+- **发现日期**：2026-05-22
+
+#### [数据流水线图] - 节点名包含小数点导致 "No shape named" 错误
+
+- **问题/发现**：流水线底部摘要条用 `\foreach \xp in {0.6,4.1,16.0,...}` 生成节点，TikZ 把 `\xp` 值（如 `16.0`）直接用作节点名，创建名为 `pipe16.0` 的形状，之后引用时报 `! Package pgf Error: No shape named 'pipe16' is known`。
+- **解决方案**：流水线节点名必须是合法标识符（字母/数字/下划线，无小数点、空格）。将循环改为逐个命名节点：`pipeA`、`pipeB`、`pipeC`、`pipeD`、`pipeE`、`pipeF`，用绝对坐标定位。或用 `\def\pipename{...}` 为每个位置单独定义名称。
+- **发现日期**：2026-05-22
+
+#### [复杂图] - hero 模块内部连线应绕边而非穿心
+
+- **问题/发现**：AlphaFold Evoformer hero 框内 6 个 sub-node 堆叠（MSA Row Attention、MSA Col Attention、FFN、Triangular Attention、Triangular Mult Update、Pair FFN），连接 MSA 侧和 Pair 侧的内部反馈箭头直接垂直画，路径穿过中间 sub-node 的文字标签，pdf-overlap-checker 报 overlap WARNING。
+- **解决方案**：hero 框内 sub-node 密集堆叠时，跨越多个 sub-node 的连线必须**从 sub-node 侧边绕行**（L 型路由）：先从起点 `.east` 或 `.west` 水平伸出 0.5-0.6cm（离开 sub-node 文字区），再垂直走到目标 y，再 `-|` 接回目标 `.east`/`.west`。不要直接 `.south` → `.north` 穿心连线。
+- **发现日期**：2026-05-22
