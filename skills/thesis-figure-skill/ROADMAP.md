@@ -7,7 +7,7 @@
 | Phase | 描述 | 状态 |
 |---|---|---|
 | 1 | 入口模式分流 + 沉淀通道 | ✅ 已实装（A 默认 + C 现有路径 + D 沉淀） |
-| 2 | 风格轴（style preset）| 🚧 待启动 |
+| 2 | 风格轴（style preset）| 🚧 进行中（D 已 token 化 + Academic/Brutalism 完成；E/F/G + Editorial/Luxury 待做）|
 | 3 | 沉淀通道（D 模式 Φ）| ✅ 已和 Phase 1 一起实装 |
 | 4 | Remix 模式（B）| 📅 计划中 |
 | 5 | 原创模式（C 全栈实装）| 📅 部分已实装（Module-First 子流程），后续扩 vision-audit 多轮 GAN |
@@ -35,9 +35,22 @@
 
 ---
 
-### Phase 2 🚧 — 风格轴（style preset）
+### Phase 2 🚧 — 风格轴（style preset） — 进行中
 
 **目标**：让用户在 `structure × style` 两个维度独立选择。
+
+**已完成（第一波，commit `d1bd715`）**：
+- 设计 16 个语义 token（c_primary / c_hero+变体 / c_accent / c_success / c_data_curve / c_warning / c_neutral / c_bar_*）
+- D skeleton 重构为 token 系统 + `\colorlet` 别名（body 代码零修改）
+- 验证 Academic preset 是真 no-op：refactor 前后 PNG MD5 完全一致
+- 写 2 个 preset：academic（默认）+ brutalism（B&W + 黄色 hero 强调）
+- Brutalism 在 D 上实测通过：视觉差异巨大但 layout 与 CONSTRAINTS 完全保留
+- 新目录 `references/style-presets/` 含 README + 2 preset 文件
+
+**待做**：
+- E/F/G 三个 skeleton 的 token 化重构（需要识别它们各自的语义角色映射）
+- 写 Editorial 和 Light Luxury 两个 preset
+- 完整验证 4 presets × 4 skeletons = 16 个组合
 
 **4 个 preset**（学术语境）：
 
@@ -185,5 +198,6 @@
 
 | 日期 | 事件 |
 |---|---|
+| 2026-05-22 | Phase 2 第一波完成（D token 化 + Academic/Brutalism preset，commit `d1bd715`）|
 | 2026-05-22 | Phase 1 实装完成（⓪.5 入口分流 + Φ 沉淀通道），ROADMAP.md 初版 |
 | 2026-05-22 之前 | 6 个 skeleton (B-G) + 4 个 skeleton 的 CONSTRAINTS 文档（D/E/F/G）完成；batch47 验证 CONSTRAINTS 文档生效 |
