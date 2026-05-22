@@ -139,6 +139,30 @@ description: |
 - Python 工具（小依赖，缺失自动 `pip3 install`）：`pdfplumber`、`pymupdf`、`pathfinding`、`opencv-python`、`scikit-image`
   （`pymupdf` 不装 → `line-through-node` + `node-overlap` 两类几何检测会 ERROR 退出，不静默跳过——别忽略）
 
+### ⓪.5 入口模式分流（⓪ 之后第一问，路径分叉点）
+
+skill 现在支持 **4 种生成路径**——画图前必须先确定走哪条。**默认走 A，其他路径由关键词触发**。
+
+| 路径 | 触发关键词（用户原 prompt） | 说明 | 状态 |
+|---|---|---|---|
+| **A — Skeleton 复用** | "画一张 X 图"、"帮我画 Y"、未明示其他 | 从已验证 skeleton (B/C/D/E/F/G) 选一个，**复制全部 + 改 content + 不动 layout**。最快、最稳。输出视觉与 skeleton 相近 | ✅ 默认 |
+| **B — Remix（跨 skeleton 拼模块）** | "组合 D 的雷达 + G 的图表那种"、"想要 X 的左半 + Y 的右半" | 多选 skeleton 部件，自动拼装 | 🚧 Phase 4 计划，当前**回退到 A** |
+| **C — 原创设计** | "独特版面"、"复刻这张 ref.png"、"从零设计"、"我没有合适的 skeleton" | architect 设计 zone → implementer 写 TikZ → vision-audit 多轮 GAN（即现有 Module-First 从零路） | ✅ 现有路径 |
+| **D — 沉淀入库** | "把这张 .tex 存进库"、"作为新 skeleton"、"添加到 examples"、"沉淀到模板库" | 用户已有 .tex → 自动入库为 `example-skeleton-{H..Z}-<topic>.tex` | ✅ 走 **Φ 沉淀通道** |
+
+**走 A** → 继续 ① ② ③ ④ ④.5 ⑤ ⑥ ⑦（③ 走 A 路：从 6 个 skeleton 选最匹配的 → 复制全部 → 改 content / 不动 layout / 严格遵守 CONSTRAINTS section）
+**走 B** → 当前不可用。报告用户"Remix 模式在 Phase 4 计划，当前请用 A skeleton 复用；如果你想要的部件组合在某个 skeleton 里近似存在，可以直接走 A 选最接近的"
+**走 C** → 继续 ① ② ③ ④ ④.5 ⑤ ⑥ ⑦（③ 走从零路 + Module-First ③.A→③.D 子流程）
+**走 D** → **跳过 ①-⑦**，直接进 **Φ 沉淀通道**（见文末）
+
+**判断规则**（按优先级）：
+1. 用户提到 "存进库 / 入库 / 作为模板 / save to examples" → **强 D**（直接走 Φ）
+2. 用户提到 "组合 X 的 Y + Z 的 W" → **强 B**（回退到 A + 提示）
+3. 用户提到 "独特 / 原创 / 复刻 / from scratch / 无参考图" → **弱 C**（询问确认走 A 还是 C）
+4. 其余 → **A**（不需要询问，直接走 skeleton 路径）
+
+**模式选择对编译验证 / vision-audit 的影响**：A 模式因为 skeleton 已经过版面验证，④.5 重点放在"内容是否完全脱离 skeleton 主题（renaming 漏掉、stale 标签）"上；C 模式才需要完整 18 项 checklist；D 模式走 Φ.2 简化版 audit。
+
 ### ① 画图指令（强制显式输出，不可跳过）
 
 **加载 `references/step1-instructions.md`**——里面有完整的 10 项要素清单、参考图测量规则、ASCII 草图法、嵌入可视化决策表、**密度参考表（按论文复杂度选档位）**、节点形状/连线速查、Pre-flight P1-P7。**禁止"心里想好直接写代码"**——跳过这步返工率 100%。
@@ -442,6 +466,76 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 - 2 次以上才解决的问题 → 追加到 `references/lessons.md` 的 Part 2
 - 发现更优参数 → 更新 `lessons.md` 的 Part 1 基线表（**只升不降**）
 - 已被全局规则/Python checker 覆盖的内容**不要重复写入**
+
+## Φ 沉淀通道（D 模式 — 用户已有 .tex 入库为新 skeleton）
+
+**触发**：⓪.5 用户选 D 路径。
+
+**前置条件**：
+- 用户提供已编译通过的 `.tex` 文件路径
+- 文件能 xelatex 编译成功
+- 渲染后视觉无明显 bug
+
+**流程**：
+
+```
+Φ.1 — 接收 + 编译验证
+   - 读取用户提供的 .tex 文件
+   - 跑 xelatex -interaction=nonstopmode + pdftoppm -r 150 渲染 PNG
+   - 编译失败 → 报告错误，停止入库
+
+Φ.2 — Vision-audit 把关（简化版 ④.5）
+   - Read 渲染出的 PNG
+   - 走 Step 0（3 大法则）+ 18 项中的关键 6 项（S1 整图对齐 / S5 元素间距 /
+     T1 文字渲染 / M3 信息流方向 / E5 箭头清晰 / V1 整体审美）
+   - 任何 blocker → 报告给用户，要求修复后再入库
+
+Φ.3 — 分析 layout pattern
+   - 扫描 .tex 提取：zone 数量 / zone 坐标范围 / hero 子结构 / 嵌入 viz 类型 /
+     配色（line/fill 色对集合）/ 箭头模式
+   - 与现有 6 skeleton 对比；若属变体 → 提示用户"看起来像 skeleton X 变体，
+     要并入 X 而非新建吗？"
+   - 否则进 Φ.4
+
+Φ.4 — 命名 + 字母分配
+   - ls references/tikz-snippets/example-skeleton-*.tex 取下一个可用字母
+     （当前到 G，下一个 = H）
+   - 询问用户主题 kebab-case 名（如 "diffusion-denoising" /
+     "transformer-encoder-decoder"）
+   - 文件名：example-skeleton-H-<topic>.tex
+
+Φ.5 — 自动生成 USAGE header
+   - 顶部模板（严格参考现有 D/E/F/G 的 header 风格）：
+     * 标题行 "Skeleton X — <一句话布局描述>"
+     * USAGE: "Adapted from a user-contributed figure. Sub-agent: copy
+       ENTIRE file as figure.tex, change ONLY content."
+     * LAYOUT MODEL: ASCII 草图（按 Φ.3 分析的 zone 布局自动生成）
+     * WHEN TO USE: 按 layout 模式推断（pipeline / hero+panels /
+       vertical-3-segment / multi-phase / federated-vertical / fusion / etc.）
+     * CONTAINS: 列出 zone / hero / viz / panel 清单
+     * CONSTRAINTS — DO NOT VIOLATE: **留空 + TODO 注释 + 提示**
+       （自动提取版面约束太难。Φ.7 会提醒用户后续补）
+
+Φ.6 — 写入库 + 更新索引
+   - 写文件 references/tikz-snippets/example-skeleton-H-<topic>.tex
+   - 渲染并保存 example-skeleton-H-<topic>.png 作为预览（与现有 6 个
+     skeleton 的预览风格一致）
+   - 若 references/tikz-snippets/README.md 有 inline gallery → 添加新条目
+
+Φ.7 — 提醒用户后续补 CONSTRAINTS（关键防回归提示）
+   - "⚠️ 新 skeleton 已入库，但 CONSTRAINTS 段当前是 TODO 占位。
+      如果你在画这张图时踩过坑（标签长度上限 / 锚点选择 / 路径形状 /
+      box 宽度依赖等），请手动补充到这一段。
+      这是防止未来 sub-agent 复用时重新引入 bug 的关键——参考
+      D/E/F/G 的 CONSTRAINTS section 写法。"
+```
+
+**Φ 与 ⑦ 经验沉淀 的区别**：
+- ⑦ 沉淀**抽象 lessons 与基线参数**（写入 `references/lessons.md`）
+- Φ 沉淀**完整可复用的 figure 模板**（写入 `tikz-snippets/example-skeleton-X-*.tex`）
+- 两者独立工作，可在同一会话各做各的
+
+**Φ 的杠杆价值**：每入一个 skeleton，未来 N 个 user/session 都能复用。**库是 self-growing 的**——这是 thesis-figure-skill 长期复利的核心机制。
 
 ## 设计原则（对抗模型惯性）
 
