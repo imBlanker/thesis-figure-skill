@@ -134,46 +134,47 @@
 % ================================================================
 \node[rectangle, rounded corners=6pt, draw=drawBlueLine, fill=drawBlueFill!15,
     minimum width=15cm, minimum height=3.2cm, thick, inner sep=0pt] (panel) at (6, 2.0) {};
-\node[font=\small\bfseries, text=drawBlueLine!80!black, anchor=north west] at (-0.8, 3.5)
-    {实验结果：三城市联合预测性能};
+% Fix G.4: was anchor=north west at y=3.5 — INSIDE panel top y=3.6 by 0.1cm.
+% Move to anchor=south west at y=3.7 so title sits clearly ABOVE the panel.
+\node[font=\small\bfseries, text=drawBlueLine!80!black, anchor=south west]
+    at (-0.8, 3.7) {实验结果：三城市联合预测性能};
 
-% Embedded bar chart (shifted down to avoid title overlap)
-\begin{scope}[shift={(1.5, 0.45)}]
-  % Axes
-  \draw[-{Stealth[scale=0.6]}, thick, drawGreyLine] (0.5, 0.2) -- (0.5, 2.6);
+% Embedded bar chart
+% Fix G.6: was y-axis labeled 5/10/15/20 (max 20) but bar value labels
+% said 22.1/25.3 — bar heights and axis scale didn't match (visual lie).
+% Now: extend axis to label "30", scale = 0.1 cm per 1 unit of value,
+% bar heights = 0.2 + 0.1 * value (correct linear mapping).
+\begin{scope}[shift={(1.5, 0.20)}]
+  % Axes — extended to y=3.2 (label 30)
+  \draw[-{Stealth[scale=0.6]}, thick, drawGreyLine] (0.5, 0.2) -- (0.5, 3.4);
   \draw[-{Stealth[scale=0.6]}, thick, drawGreyLine] (0.5, 0.2) -- (5.5, 0.2);
-  % Grid lines
-  \foreach \y in {0.7, 1.2, 1.7, 2.2} {
+  % Grid lines + Y-axis ticks at 5/10/15/20/25/30
+  \foreach \y/\lab in {0.7/5, 1.2/10, 1.7/15, 2.2/20, 2.7/25, 3.2/30} {
     \draw[gray!20, thin] (0.5, \y) -- (5.2, \y);
+    \node[font=\scriptsize, left, text=drawGreyLine] at (0.4, \y) {\lab};
   }
-  % Y-axis ticks
-  \node[font=\scriptsize, left, text=drawGreyLine] at (0.4, 0.7) {5};
-  \node[font=\scriptsize, left, text=drawGreyLine] at (0.4, 1.2) {10};
-  \node[font=\scriptsize, left, text=drawGreyLine] at (0.4, 1.7) {15};
-  \node[font=\scriptsize, left, text=drawGreyLine] at (0.4, 2.2) {20};
 
-  % MAE group — value labels above bars, improvement labels to the right
-  \fill[drawGreyFill, draw=drawGreyLine] (1.0, 0.2) rectangle (1.6, 2.0);
-  \fill[barBlue, draw=barBlue!80!black, rounded corners=1pt] (1.8, 0.2) rectangle (2.4, 1.64);
-  \node[font=\scriptsize, text=drawGreyLine] at (1.3, 2.15) {22.1};
-  \node[font=\scriptsize, text=barBlue!80!black] at (2.1, 1.79) {18.1};
+  % MAE group — bar heights NOW match axis (22.1→y=2.41, 18.1→y=2.01)
+  \fill[drawGreyFill, draw=drawGreyLine] (1.0, 0.2) rectangle (1.6, 2.41);
+  \fill[barBlue, draw=barBlue!80!black, rounded corners=1pt] (1.8, 0.2) rectangle (2.4, 2.01);
+  \node[font=\scriptsize, text=drawGreyLine] at (1.3, 2.56) {22.1};
+  \node[font=\scriptsize, text=barBlue!80!black] at (2.1, 2.16) {18.1};
   \node[font=\scriptsize] at (1.7, -0.05) {MAE};
 
-  % RMSE group
-  \fill[drawGreyFill, draw=drawGreyLine] (3.0, 0.2) rectangle (3.6, 2.3);
-  \fill[barBlue, draw=barBlue!80!black, rounded corners=1pt] (3.8, 0.2) rectangle (4.4, 1.8);
-  \node[font=\scriptsize, text=drawGreyLine] at (3.3, 2.45) {25.3};
-  \node[font=\scriptsize, text=barBlue!80!black] at (4.1, 1.95) {19.8};
+  % RMSE group — 25.3→y=2.73, 19.8→y=2.18
+  \fill[drawGreyFill, draw=drawGreyLine] (3.0, 0.2) rectangle (3.6, 2.73);
+  \fill[barBlue, draw=barBlue!80!black, rounded corners=1pt] (3.8, 0.2) rectangle (4.4, 2.18);
+  \node[font=\scriptsize, text=drawGreyLine] at (3.3, 2.88) {25.3};
+  \node[font=\scriptsize, text=barBlue!80!black] at (4.1, 2.33) {19.8};
   \node[font=\scriptsize] at (3.7, -0.05) {RMSE};
 
-  % Improvement arrows + labels — placed to the RIGHT of each pair
-  % (avoids overlap with value labels above the bars)
-  \draw[-{Stealth[scale=0.5]}, very thick, drawRedLine] (2.5, 1.8) -- (2.5, 1.4);
+  % Improvement arrows + labels — to the RIGHT of each pair
+  \draw[-{Stealth[scale=0.5]}, very thick, drawRedLine] (2.55, 2.41) -- (2.55, 2.01);
   \node[font=\scriptsize\bfseries, text=drawRedLine, anchor=west]
-      at (2.55, 1.6) {$\downarrow$18.3\%};
-  \draw[-{Stealth[scale=0.5]}, very thick, drawRedLine] (4.5, 2.05) -- (4.5, 1.6);
+      at (2.6, 2.21) {$\downarrow$18.3\%};
+  \draw[-{Stealth[scale=0.5]}, very thick, drawRedLine] (4.55, 2.73) -- (4.55, 2.18);
   \node[font=\scriptsize\bfseries, text=drawRedLine, anchor=west]
-      at (4.55, 1.82) {$\downarrow$21.7\%};
+      at (4.6, 2.46) {$\downarrow$21.7\%};
 \end{scope}
 
 % Legend (right side of panel)
@@ -184,10 +185,14 @@
   \node[font=\scriptsize, anchor=west] at (0.5, 0.35) {FedTraffic};
 \end{scope}
 
-% Key insight
-\node[font=\footnotesize\bfseries, text=drawGreenLine!80!black,
-      fill=drawGreenFill!50, draw=drawGreenLine!50, rounded corners=3pt,
-      inner sep=5pt, anchor=west] at (9.0, 2.8) {数据不出域，隐私安全};
+% Key insight — Fix G.5: was green-on-green chip inside blue panel
+% (color conflict + visually a "data point" inside the chart area).
+% Move OUTSIDE the panel (above it, anchor=south) and harmonize color
+% with the panel's blue theme so it reads as a summary annotation.
+\node[font=\footnotesize\bfseries, text=drawBlueLine!80!black,
+      fill=drawBlueFill!40, draw=drawBlueLine!50, rounded corners=3pt,
+      inner sep=5pt, anchor=south west] at (9.0, 3.7)
+    {数据不出域，隐私安全};
 
 % ================================================================
 %  CONNECTIONS — Sensors → Preprocessing

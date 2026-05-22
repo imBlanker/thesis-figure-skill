@@ -31,6 +31,7 @@
 \definecolor{acaTealBg}{HTML}{D3EBEB}
 \definecolor{acaGoldLine}{HTML}{B08820}
 \definecolor{acaGoldBg}{HTML}{F4E8CC}
+\definecolor{acaGreenBg}{HTML}{DBEDDC}
 \definecolor{acaGreyLine}{HTML}{606060}
 \definecolor{cellLo}{HTML}{F0E8F8}
 \definecolor{cellHi}{HTML}{6E3FA0}
@@ -212,14 +213,17 @@
 \drawzone{acaGoldLine}{acaGoldBg}{0}{-2.5}{9.5}{1.0}
 \zonetitle{acaGoldLine}{0}{9.5}{1.0}{End-to-End Pipeline}
 
+% Fix C.5: pipeline boxes were asymmetric (left 0.375cm vs right 0.075cm)
+% Center 5 boxes in zone x=[0, 9.5]: total content 5*1.65 + 4*0.2 = 9.05,
+% padding (9.5-9.05)/2 = 0.225 each side. First box center at 0.225+0.825=1.05
 \foreach \i/\name/\col in {1/Input/acaTealLine, 2/Embed/acaBlueLine,
                           3/Encode/acaPurpleLine, 4/Decode/acaOrangeLine,
                           5/Output/acaGreenLine} {
-  \pgfmathsetmacro\cx{0.6 + (\i - 1) * 1.85}
+  \pgfmathsetmacro\cx{1.05 + (\i - 1) * 1.85}
   \node[rectangle, rounded corners=3pt, fill=white, draw=\col,
         line width=0.5pt, font=\scriptsize\bfseries, text=\col,
         minimum width=1.65cm, minimum height=0.55cm]
-    (pip\i) at (\cx + 0.6, -0.5) {\name};
+    (pip\i) at (\cx, -0.5) {\name};
 }
 \foreach \a/\b in {1/2, 2/3, 3/4, 4/5} {
   \draw[-{Stealth[length=3pt]}, line width=0.4pt, color=acaGreyLine,
@@ -232,7 +236,10 @@
 % =====================================================================
 % RD PANEL: Metric cards — x=[11, 21], y=[-2.5, 1.0]
 % =====================================================================
-\drawzone{acaGreenLine}{acaGreenLine}{11.0}{-2.5}{21.0}{1.0}
+% Fix C.1: was {acaGreenLine}{acaGreenLine} → fill=#2!50 made solid
+% saturated green that drowned the white metric cards. Use the Bg
+% variant just like the other panels (LU/RU/Hero/LD).
+\drawzone{acaGreenLine}{acaGreenBg}{11.0}{-2.5}{21.0}{1.0}
 \zonetitle{acaGreenLine}{11}{21}{1.0}{Performance Metrics}
 
 % Metric cards (use \large not \Large — matches surrounding box font)
@@ -260,7 +267,7 @@
 \foreach \i/\col/\lab in {%
   1/acaTealLine/Hyperparams,%
   2/acaBlueLine/Benchmarks,%
-  3/acaPurpleLine/Hero/Core,%
+  3/acaPurpleLine/Hero,%
   4/acaGoldLine/Pipeline,%
   5/acaGreenLine/Metrics%
 } {

@@ -151,7 +151,10 @@
 \draw[arrow] (ot.south) -- (eval.north);
 
 % Embedded gate count mini-chart
-\begin{scope}[shift={(13.3, 7.8)}]
+% Fix F.3: was shift=(13.3, 7.8) with label at y=7.6 — outside Phase 3
+% core box bottom y=7.75. Moved up to (13.3, 8.0) so label at y=7.8 is
+% just above box bottom (7.75) — fully inside.
+\begin{scope}[shift={(13.3, 8.0)}]
   \fill[acaPurpleLine!60] (0.0, 0) rectangle (0.3, 0.8);
   \fill[acaPurpleLine!45] (0.4, 0) rectangle (0.7, 1.2);
   \fill[acaPurpleLine!30] (0.8, 0) rectangle (1.1, 0.6);
@@ -237,7 +240,7 @@
       at (2.5, 16.3) {Phase 1: Setup};
 \node[font=\footnotesize\bfseries, fill=acaBlueFill!80, draw=acaBlueLine!50,
       rounded corners=3pt, inner sep=4pt, text=acaBlueLine!80!black]
-      at (8.5, 16.8) {Phase 2: Input Encryption};
+      at (8.5, 16.3) {Phase 2: Input Encryption};   % Fix F.2: was 16.8 → 0.5cm higher than other 3 phase chips
 \node[font=\footnotesize\bfseries, fill=acaRedFill!80, draw=acaRedLine!50,
       rounded corners=3pt, inner sep=4pt, text=acaRedLine!80!black]
       at (15, 16.3) {Phase 3: Secure Computation};
@@ -248,8 +251,11 @@
 % ================================================================
 %  SECURITY ANNOTATION
 % ================================================================
+% Fix F.1: Security note was anchor=north west at (0.5, 7.2) — outside
+% Phase 1 zone bottom (y=7.5). Move INTO Phase 1 zone bottom area:
+% anchor=south west at (0.5, 7.6) places note at bottom of Phase 1 zone.
 \node[font=\scriptsize, text=acaRedLine, fill=acaRedFill!50, draw=acaRedLine!40,
-      rounded corners=3pt, inner sep=4pt, anchor=north west] at (0.5, 7.2)
+      rounded corners=3pt, inner sep=4pt, anchor=south west] at (0.5, 7.6)
     {\shortstack[l]{Security: $\lambda = 128$ bits\\Semi-honest model\\UC-secure}};
 
 \end{tikzpicture}

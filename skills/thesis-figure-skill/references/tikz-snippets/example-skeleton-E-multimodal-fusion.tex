@@ -194,7 +194,10 @@
 \node[font=\footnotesize\bfseries, text=drawBlueLine!80!black] at (21.5, 14.3)
     {Grad-CAM};
 % Mini heatmap for Grad-CAM (4x4 grid)
-\begin{scope}[shift={(20.5, 12.6)}]
+% Fix E.5: was shift=(20.5, 12.6) → bottom row at y=11.55, outside
+% node bottom y=12.25 (Grad-CAM node center 13.5, height 2.5).
+% Moved up to (20.5, 13.6): rows at 13.6/13.25/12.9/12.55 all inside.
+\begin{scope}[shift={(20.5, 13.6)}]
   \foreach \r in {0,...,3} {
     \foreach \c in {0,...,3} {
       \pgfmathtruncatemacro{\v}{int(mod(\r*\r+\c*3+2,5))}
@@ -206,7 +209,7 @@
       \fill[\cc] ({\c*0.4},{-\r*0.35}) rectangle ({\c*0.4+0.38},{-\r*0.35+0.33});
     }
   }
-  \node[font=\tiny, text=drawBlueLine] at (0.8, 0.5) {CT注意力区域};
+  \node[font=\tiny, text=drawBlueLine] at (0.8, -1.65) {CT注意力区域};
 \end{scope}
 
 % SHAP analysis with horizontal bar chart
@@ -246,8 +249,11 @@
 % ================================================================
 \node[rectangle, rounded corners=6pt, draw=drawBlueLine, fill=drawBlueFill!12,
     minimum width=22cm, minimum height=3.5cm, thick, inner sep=0pt] (aucpanel) at (12, 1.5) {};
-\node[font=\small\bfseries, text=drawBlueLine!80!black, anchor=north west]
-    at (1.5, 3.0) {多模态融合性能对比 (AUC)};
+% Fix E.3: title was at y=3.0 (anchor=north west) — INSIDE panel top y=3.25
+% by 0.25cm, looking clipped. Move to anchor=south west at y=3.35 so the
+% title sits clearly ABOVE the panel like a section header.
+\node[font=\small\bfseries, text=drawBlueLine!80!black, anchor=south west]
+    at (1.5, 3.35) {多模态融合性能对比 (AUC)};
 
 % AUC bar chart
 \begin{scope}[shift={(5, 0.3)}]
