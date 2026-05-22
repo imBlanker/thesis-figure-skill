@@ -175,9 +175,10 @@
 }
 
 % Middle: attention heatmap at x=[8.5, 12.5]
-% Fix: was yH=4.7 → heatmap bottom y=1.5 (= hero zone bottom!), heatmap
-% pixels touching zone border. yH=5.0 → bottom y=1.8 (0.3cm padding).
-\def\xH{8.5}\def\yH{5.0}\def\cs{0.4}\def\N{8}
+% Fix 4: heatmap was not horizontally centered in hero zone.
+% Hero zone center x = 10.5. Heatmap width = N*cs = 2.56cm.
+% So xH = 10.5 - 1.28 = 9.22 → heatmap center = 9.22 + 1.28 = 10.5 ✓
+\def\xH{9.22}\def\yH{4.3}\def\cs{0.32}\def\N{8}
 \foreach \i in {1,...,\N} {
   \foreach \j in {1,...,\N} {
     \pgfmathsetmacro\val{exp(-abs(\i-\j)/2.5)*100}
@@ -192,8 +193,9 @@
   (\xH, \yH) grid (\xH + \N*\cs, \yH - \N*\cs);
 \draw[acaPurpleLine, line width=0.5pt]
   (\xH, \yH) rectangle (\xH + \N*\cs, \yH - \N*\cs);
-\node[font=\tiny\bfseries, color=acaPurpleLine, anchor=south]
-  at (\xH + \N*\cs/2, \yH + 0.05) {Attention Weights ($N=8$)};
+% Label removed: above caused overlap with hero title, below caused
+% overlap with zone bottom border. Heatmap visual is self-explanatory
+% in context of "Core Architecture (Hero)" zone with adjacent formulas.
 
 % Right: 2 formula boxes at x=[13.5, 20]
 % Use \footnotesize for formulas — matches surrounding box label size
