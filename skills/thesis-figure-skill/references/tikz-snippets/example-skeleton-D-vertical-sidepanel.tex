@@ -61,60 +61,23 @@
 \usepackage{amsmath,amssymb}
 \usetikzlibrary{shapes, arrows.meta, positioning, fit, backgrounds, calc, shadows, shapes.geometric}
 
-% =====================================================================
-% STYLE PRESET: Academic Professional (default)
-% =====================================================================
-% Switch styles by REPLACING the entire "PRESET DEFINITION" block below
-% (between BEGIN/END markers). Aliases remain unchanged so body code is
-% never touched.
-%
-% Available presets (see references/style-presets/):
-%   - academic   (this file — soft pastels, drop shadows, sans rounded)
-%   - brutalism  (B&W + single accent, thick borders, no shadows)
-%   - editorial  (single accent + grey, generous whitespace)
-%   - luxury     (pastels + hairlines, refined typography)
-%
-% Token semantics (16 tokens):
-%   c_primary_*       main entity layer (clients/inputs/parties)
-%   c_hero_*          core processing zone — hero color
-%   c_hero_{deep,mid,light,pale}  hero internal depth layers
-%   c_accent_*        secondary/specialty zone (e.g., security)
-%   c_success_*       positive indicators (checks, OK)
-%   c_data_curve_*    chart curves / time-series plots
-%   c_warning_*       alerts / red
-%   c_neutral_*       grey strokes / fills / axes
-%   c_bar_{1,2,3}     multi-bar chart palette
-% =====================================================================
-
-% ----- BEGIN PRESET DEFINITION -----
-\definecolor{c_primary_line}{HTML}{3B82F6}       \definecolor{c_primary_fill}{HTML}{DBEAFE}
-\definecolor{c_hero_line}{HTML}{7030E0}          \definecolor{c_hero_fill}{HTML}{EDE9FE}
-\definecolor{c_hero_deep}{HTML}{401090}          \definecolor{c_hero_mid}{HTML}{6020D0}
-\definecolor{c_hero_light}{HTML}{8B5CF6}         \definecolor{c_hero_pale}{HTML}{C4B5FD}
-\definecolor{c_accent_line}{HTML}{009060}        \definecolor{c_accent_fill}{HTML}{D1FAE5}
-\definecolor{c_success_line}{HTML}{30A060}       \definecolor{c_success_fill}{HTML}{ECFDF5}
-\definecolor{c_data_curve_line}{HTML}{F59E0B}    \definecolor{c_data_curve_fill}{HTML}{FEF3C7}
-\definecolor{c_warning_line}{HTML}{E03030}       \definecolor{c_warning_fill}{HTML}{F8CECC}
-\definecolor{c_neutral_line}{HTML}{666666}       \definecolor{c_neutral_fill}{HTML}{F5F5F5}
-\definecolor{c_bar_1}{HTML}{3080C0}              \definecolor{c_bar_2}{HTML}{009060}
-\definecolor{c_bar_3}{HTML}{F59E0B}
-% ----- END PRESET DEFINITION -----
-
-% ----- BEGIN BACKWARDS-COMPAT ALIASES (DO NOT EDIT) -----
-% Body code references the old names; these alias to the tokens above.
-% When switching presets, only the PRESET DEFINITION block changes.
-\colorlet{acaBlueLine}{c_primary_line}           \colorlet{acaBlueFill}{c_primary_fill}
-\colorlet{acaPurpleLine}{c_hero_line}            \colorlet{acaPurpleFill}{c_hero_fill}
-\colorlet{purpleDeep}{c_hero_deep}               \colorlet{purpleMid}{c_hero_mid}
-\colorlet{purpleLight}{c_hero_light}             \colorlet{purplePale}{c_hero_pale}
-\colorlet{acaTealLine}{c_accent_line}            \colorlet{acaTealFill}{c_accent_fill}
-\colorlet{acaGreenLine}{c_success_line}          \colorlet{acaGreenFill}{c_success_fill}
-\colorlet{acaOrangeLine}{c_data_curve_line}      \colorlet{acaOrangeFill}{c_data_curve_fill}
-\colorlet{acaRedLine}{c_warning_line}            \colorlet{acaRedFill}{c_warning_fill}
-\colorlet{acaGreyLine}{c_neutral_line}           \colorlet{acaGreyFill}{c_neutral_fill}
-\colorlet{chartBlue}{c_bar_1}                    \colorlet{chartGreen}{c_bar_2}
-\colorlet{chartOrange}{c_bar_3}
-% ----- END BACKWARDS-COMPAT ALIASES -----
+% ===== Academic Palette =====
+\definecolor{acaBlueLine}{HTML}{3B82F6}      \definecolor{acaBlueFill}{HTML}{DBEAFE}
+\definecolor{acaPurpleLine}{HTML}{7030E0}    \definecolor{acaPurpleFill}{HTML}{EDE9FE}
+\definecolor{acaTealLine}{HTML}{009060}      \definecolor{acaTealFill}{HTML}{D1FAE5}
+\definecolor{acaGreenLine}{HTML}{30A060}     \definecolor{acaGreenFill}{HTML}{ECFDF5}
+\definecolor{acaOrangeLine}{HTML}{F59E0B}    \definecolor{acaOrangeFill}{HTML}{FEF3C7}
+\definecolor{acaRedLine}{HTML}{E03030}       \definecolor{acaRedFill}{HTML}{F8CECC}
+\definecolor{acaGreyLine}{HTML}{666666}      \definecolor{acaGreyFill}{HTML}{F5F5F5}
+% Deep purple variants
+\definecolor{purpleDeep}{HTML}{401090}
+\definecolor{purpleMid}{HTML}{6020D0}
+\definecolor{purpleLight}{HTML}{8B5CF6}
+\definecolor{purplePale}{HTML}{C4B5FD}
+% Chart
+\definecolor{chartBlue}{HTML}{3080C0}
+\definecolor{chartGreen}{HTML}{009060}
+\definecolor{chartOrange}{HTML}{F59E0B}
 
 \pgfdeclarelayer{background}
 \pgfdeclarelayer{deepbg}

@@ -52,46 +52,23 @@
 \usepackage{amsmath,amssymb}
 \usetikzlibrary{shapes, arrows.meta, positioning, fit, backgrounds, calc, shadows, shapes.geometric}
 
-% =====================================================================
-% STYLE PRESET: Academic Professional (default)
-% =====================================================================
-% E's color identity:
-%   primary=blue (modality 1), success=green (modality 2),
-%   accent=orange (modality 3), hero=purple (cross-attention fusion),
-%   warning=red, neutral=grey.
-%   4 bar colors for grouped comparison; 4-stop heatmap gradient + bg.
-%
-% Swap style by replacing PRESET DEFINITION block only.
-% See references/style-presets/README.md for token semantics.
-% =====================================================================
-
-% ----- BEGIN PRESET DEFINITION -----
-\definecolor{c_primary_line}{HTML}{6C8EBF}       \definecolor{c_primary_fill}{HTML}{DAE8FC}
-\definecolor{c_hero_line}{HTML}{9673A6}          \definecolor{c_hero_fill}{HTML}{E1D5E7}
-\definecolor{c_accent_line}{HTML}{D79B00}        \definecolor{c_accent_fill}{HTML}{FFE6CC}
-\definecolor{c_success_line}{HTML}{82B366}       \definecolor{c_success_fill}{HTML}{D5E8D4}
-\definecolor{c_warning_line}{HTML}{B85450}       \definecolor{c_warning_fill}{HTML}{F8CECC}
-\definecolor{c_neutral_line}{HTML}{666666}       \definecolor{c_neutral_fill}{HTML}{F5F5F5}
-\definecolor{c_bar_1}{HTML}{3B82F6}              \definecolor{c_bar_2}{HTML}{22C55E}
-\definecolor{c_bar_3}{HTML}{F59E0B}              \definecolor{c_bar_4}{HTML}{EF4444}
-\definecolor{c_heat_5}{HTML}{6D28D9}             \definecolor{c_heat_4}{HTML}{3B82F6}
-\definecolor{c_heat_3}{HTML}{93C5FD}             \definecolor{c_heat_2}{HTML}{DBEAFE}
-\definecolor{c_heat_bg}{HTML}{F0F4FF}
-% ----- END PRESET DEFINITION -----
-
-% ----- BEGIN BACKWARDS-COMPAT ALIASES (DO NOT EDIT) -----
-\colorlet{drawBlueLine}{c_primary_line}          \colorlet{drawBlueFill}{c_primary_fill}
-\colorlet{drawGreenLine}{c_success_line}         \colorlet{drawGreenFill}{c_success_fill}
-\colorlet{drawOrangeLine}{c_accent_line}         \colorlet{drawOrangeFill}{c_accent_fill}
-\colorlet{drawPurpleLine}{c_hero_line}           \colorlet{drawPurpleFill}{c_hero_fill}
-\colorlet{drawRedLine}{c_warning_line}           \colorlet{drawRedFill}{c_warning_fill}
-\colorlet{drawGreyLine}{c_neutral_line}          \colorlet{drawGreyFill}{c_neutral_fill}
-\colorlet{barBlue}{c_bar_1}                      \colorlet{barGreen}{c_bar_2}
-\colorlet{barOrange}{c_bar_3}                    \colorlet{barRed}{c_bar_4}
-\colorlet{heatDeep}{c_heat_5}                    \colorlet{heatDark}{c_heat_4}
-\colorlet{heatMid}{c_heat_3}                     \colorlet{heatLight}{c_heat_2}
-\colorlet{heatBg}{c_heat_bg}
-% ----- END BACKWARDS-COMPAT ALIASES -----
+% ===== Color Palette =====
+\definecolor{drawBlueFill}{HTML}{DAE8FC}    \definecolor{drawBlueLine}{HTML}{6C8EBF}
+\definecolor{drawGreenFill}{HTML}{D5E8D4}   \definecolor{drawGreenLine}{HTML}{82B366}
+\definecolor{drawOrangeFill}{HTML}{FFE6CC}   \definecolor{drawOrangeLine}{HTML}{D79B00}
+\definecolor{drawPurpleFill}{HTML}{E1D5E7}   \definecolor{drawPurpleLine}{HTML}{9673A6}
+\definecolor{drawRedFill}{HTML}{F8CECC}      \definecolor{drawRedLine}{HTML}{B85450}
+\definecolor{drawGreyFill}{HTML}{F5F5F5}     \definecolor{drawGreyLine}{HTML}{666666}
+% Data visualization palette
+\definecolor{barBlue}{HTML}{3B82F6}
+\definecolor{barGreen}{HTML}{22C55E}
+\definecolor{barOrange}{HTML}{F59E0B}
+\definecolor{barRed}{HTML}{EF4444}
+\definecolor{heatDeep}{HTML}{6D28D9}
+\definecolor{heatDark}{HTML}{3B82F6}
+\definecolor{heatMid}{HTML}{93C5FD}
+\definecolor{heatLight}{HTML}{DBEAFE}
+\definecolor{heatBg}{HTML}{F0F4FF}
 
 \pgfdeclarelayer{background}
 \pgfsetlayers{background,main}
