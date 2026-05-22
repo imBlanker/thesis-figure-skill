@@ -58,6 +58,30 @@ Batch 13-17 演化教训：纯文本 Philosophy + 18 项 checklist 让 sub-agent
 | `color-legend.tex` | 底部 N 色 legend strip | ![color-legend](previews/color-legend.png) |
 | `summary-bar.tex` | 底部 pipeline summary bar | ![summary-bar](previews/summary-bar.png) |
 
+### 6. 🏆 完整 Figure 范例（GOLD STANDARD — sub-agent 复制后改 content）
+
+**Batch 19 用户反馈**：snippets 单个完美但**组合时仍有重叠/排版问题**。原因：sub-agent 复制 snippet 后自己定位坐标。这 2 个范例提供**完整 figure.tex 骨架**（含精确 zone 位置、所有 element 都 bounded 在 zone 内），sub-agent **复制整文件后只改 content** = 零位置 bug。
+
+| 文件 | 骨架 | 预览 |
+|---|---|---|
+| `example-skeleton-B-horizontal.tex` | **B: 5 stage 横向**（适合 pipeline 类）| ![example-B](previews/example-skeleton-B-horizontal.png) |
+| `example-skeleton-C-centralhero.tex` | **C: 中央 hero + 4 panels**（适合 model card 类）| ![example-C](previews/example-skeleton-C-centralhero.png) |
+
+**关键设计原则**（这 2 个范例都遵循）：
+
+- **显式 (x0, y0, x1, y1) rectangle 而非 fit 库**——避免"zone 外溢"陷阱
+- **每个 zone 用 `\drawzone` 或 `\drawstage` 辅助函数**——保证 bg + border + title 一致
+- **同 row 模块同 y baseline + 同 height**——`COMPOSITION-RULES.md` 铁律
+- **bar chart 用 hard-code `\foreach \i/\name/\val`**——避免 idx 累加 bug
+- **所有 content 显式 inside zone rect**——不超出 zone
+
+**Sub-agent 使用流程**：
+1. 选骨架 B（pipeline 类）或 C（hero + panels 类）
+2. 复制对应 example.tex 为 `figure.tex`
+3. 改 title + zone titles + box labels + 数字 + 公式
+4. 不要改 zone 坐标、不要改 helper macros、不要改 layout grid
+5. 编译 → 看效果 → 微调 content（不动结构）
+
 ## 使用规则
 
 1. **先看 PNG 选 snippet**——`previews/` 里有所有 demo PNG，视觉决定选哪个

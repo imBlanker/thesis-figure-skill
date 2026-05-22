@@ -98,9 +98,9 @@ description: |
 
 **复杂档强制流程**：
 1. **先读 `references/tikz-snippets/README.md`** —— inline gallery 含每个 snippet 的 PNG 预览
-2. **看 PNG 选 ≥ 3 snippet** —— 视觉决定，不是文字想象
-3. **必读 `COMPOSITION-RULES.md`** —— 解决"snippets 都塞进去但仍乱"问题
-4. **选 A/B/C 三种骨架之一** —— 不要自创随机布局
+2. **首选**：复制完整 `example-skeleton-B-horizontal.tex`（pipeline 类）或 `example-skeleton-C-centralhero.tex`（hero+panels 类）作 figure.tex，改 content 不动 layout
+3. **次选**（特殊布局需求）：看 PNG 选 ≥ 3 snippet 自己拼装
+4. **必读 `COMPOSITION-RULES.md`** —— 解决"snippets 都塞进去但仍乱"问题
 5. **底部必有** color-legend OR summary-bar
 6. **绝对不能"简化"snippet 核心结构** —— 简化 = 信息稀疏 = 平庸
 
