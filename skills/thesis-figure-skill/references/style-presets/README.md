@@ -53,8 +53,8 @@ Below that block is a **BACKWARDS-COMPAT ALIASES** block that maps the legacy co
 |---|---|---|
 | **Academic Professional** (default) | `preset-academic.tex` (D's values) | **Per-skeleton** — each token-ized skeleton's PRESET DEFINITION block holds its own Academic identity (D uses purple hero, G uses red hero, etc.). `preset-academic.tex` documents D's values as a representative example. |
 | **Brutalism / High Contrast** | `preset-brutalism.tex` | **Universal** — same values work across D/E/F/G. Pure B&W with a single bright yellow hero accent. Validated on D and G. |
-| **Editorial / Magazine** | (TODO) | Universal — single deep accent (typically red/charcoal) + warm greyscale + cream backgrounds |
-| **Light Luxury** | (TODO) | Universal — pastels + hairlines + refined typography palette |
+| **Editorial / Magazine** | `preset-editorial.tex` | **Universal** — deep navy hero + cream backgrounds + single deep-red accent + warm greyscale. New Yorker / Atlantic aesthetic. Validated on D. |
+| **Light Luxury** | `preset-luxury.tex` | **Universal** — dusty mauve hero + sage / champagne / soft pink palette. Refined low-contrast. Validated on E. |
 
 ## Workflow for sub-agent in Mode A
 
@@ -69,4 +69,5 @@ Below that block is a **BACKWARDS-COMPAT ALIASES** block that maps the legacy co
 
 - Tokens cover **colors only**. Style attributes like border thickness, drop shadow opacity, corner radius are controlled by the `base_box` / arrow `.style` definitions in the tikzpicture — these are NOT yet token-ized.
 - The `\colorlet` aliasing means `acaBlueLine!70!black` still works because xcolor's `!N!c` mix operator works on any registered color name, whether defined via `\definecolor` or `\colorlet`.
+- **F's mixed-look caveat** — F has 5 zone backgrounds + 5 signal colors kept hardcoded for protocol-annotation identity. Under a non-Academic preset, F's phase-chip backgrounds stay colored while phase internals become preset-styled. This is intentional but if you want strict styling on F, manually override the `zoneXxxBg` and `acaGold/Cyan/Pink/Yellow/Lime` definitions too.
 - Brutalism radar polygons may visually merge because both polygons use shades of black — semantic limitation worth noting.
