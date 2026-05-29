@@ -455,7 +455,9 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 
 **而 generator 自审对这个核心缺陷系统性失明**：三张分别跑了 4 / 3 / 1 轮自审，全部自评"发表级 / closes cleanly"，**全部漏掉了最核心的那个缺陷**。**自审轮数多少都救不了——失明是结构性的**（generator 看不见"我想画的"↔"实际渲染的"差距）。**每一次，只有独立对抗式多镜头审查抓到了核心缺陷。**
 
-**所以 mode C 的 ④.5 不允许只靠 generator 自审**。Step 0 + 18 项照走，但**完成后必须再过这道 gate**：并行 spawn **4 个独立审查 agent**，各 Read 渲染出的 PNG，**对抗式**找问题（默认"图里有 bug，去找"），各自返回 blocker（含 severity + 位置 + **具体视觉证据**，证明它真看了图）：
+**所以 mode C 的 ④.5 不允许只靠 generator 自审**。Step 0 + 18 项照走，但**完成后必须再过这道 gate**：由 orchestrator **独立 spawn 4 个全新审查 agent**（各自空白上下文），各 Read 渲染出的 PNG，**对抗式**找问题（默认"图里有 bug，去找"），各自返回 blocker（含 severity + 位置 + **具体视觉证据**，证明它真看了图）：
+
+> 🔴 **"独立"严格指：另起的全新 agent / 空白上下文——不是 generator 自己在同一上下文里"审 4 遍"。** 同上下文自审与 generator 共享同一套盲区，等于没审。**实测（fig4 复杂图）：generator 按本 gate 跑、却跑成"同模型 self-pass 4 遍"，照样漏掉 Sankey 断裂+失比例的重崩；是独立 spawn 的 agent 才抓到。self-pass ≠ gate。**
 
 | 镜头 | 专盯 | mode C 高发崩点 |
 |---|---|---|
@@ -470,7 +472,7 @@ draw.io：`xmllint --noout file.drawio && drawio -x -f pdf -o out.pdf file.drawi
 3. 综合 = 你的眼 + 4 镜头 + checker triage → 真 blocker 列表 → 回 ④ 修 → **改完再跑一轮 gate**（改动常引入新 bug）。
 4. gate + 你 + checker 全 0 真 blocker 后，**仍把图先给用户看**（用户是最后闸门）。
 
-**机制**：4 镜头用 Agent 工具并行 spawn，或用 workflow 并行 + pipeline（每镜头喂 PNG 路径 + 该图的"应有模型"让 semantic 镜头独立重算）。**关键不是用什么工具，是"独立 + 对抗 + 多视角"——这是 mode C 唯一在 3/3 奏效的兜底。**
+**机制**：用 Agent 工具 / workflow **真正并行 spawn 出 4 个独立子 agent**（每镜头喂 PNG 路径 + 该图"应有模型"让 semantic 独立重算）。**关键是"另起 agent + 空白上下文 + 对抗 + 多视角"——这是 mode C 唯一奏效的兜底；同上下文自审多遍不算数（实测会连同 generator 一起漏）。**
 
 ### ⑤ 用户终审 + 交付
 1. **把 PNG 给用户看**（不是询问"我做完了吗"，是直接展示结果）
