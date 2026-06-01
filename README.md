@@ -35,7 +35,7 @@
 
 > 以上示例均由本 Skill 自动生成，包含编译验证、44 项视觉审查、六维度评分全流程。
 
-> 完整版本更新历史见 [Releases](https://github.com/0xE1337/thesis-figure-skill/releases)
+> 完整版本更新历史见 [Releases](https://github.com/imBlanker/thesis-figure-skill/releases)
 
 ## 特性
 
@@ -61,7 +61,7 @@
 ### 方法一：Claude 命令行安装（推荐）
 
 ```bash
-npx skills add 0xE1337/thesis-figure-skill
+npx skills add imBlanker/thesis-figure-skill
 ```
 
 ### 方法二：Codex 安装
