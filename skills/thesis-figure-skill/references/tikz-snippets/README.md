@@ -1,14 +1,14 @@
 # TikZ Snippets Library
 
 > **何时加载**：步骤 ③ 生成代码时，复杂档（含嵌入 viz / 信息 panel / 公式嵌入）**优先用 snippet 拼装**。
-> **核心理念**：snippets 是手工精雕的乐高积木——sub-agent 拼装 N×M 组合，保证基线质量同时不千图一面。
-> **PNG 预览在 `previews/` 目录**——sub-agent 选 snippet 前**先看 PNG 决定视觉效果**，再读 .tex 改参数。
+> **核心理念**：snippets 是手工精雕的乐高积木——agent / sub-agent 拼装 N×M 组合，保证基线质量同时不千图一面。
+> **PNG 预览在 `previews/` 目录**——agent / sub-agent 选 snippet 前**先看 PNG 决定视觉效果**，再读 .tex 改参数。
 
 ## 为什么有这个目录
 
-Batch 13-17 演化教训：纯文本 Philosophy + 18 项 checklist 让 sub-agent 知道"要嵌入 viz / panel / 公式"，但**写出来的视觉重量、留白、配色协调仍然失败**——因为这些是 visual perception 而非 textual 任务。
+Batch 13-17 演化教训：纯文本 Philosophy + 18 项 checklist 让 agent / sub-agent 知道"要嵌入 viz / panel / 公式"，但**写出来的视觉重量、留白、配色协调仍然失败**——因为这些是 visual perception 而非 textual 任务。
 
-**Snippet Library 解决方案**：给 sub-agent 一套**手工精雕的 TikZ 片段**（21 个，每个 30-100 行），sub-agent **看 PNG 选 + 复制粘贴 + 替换参数** 即可达到 examples 06-10 水平。
+**Snippet Library 解决方案**：给 agent / sub-agent 一套**手工精雕的 TikZ 片段**（21 个，每个 30-100 行），agent / sub-agent **看 PNG 选 + 复制粘贴 + 替换参数** 即可达到 examples 06-10 水平。
 
 ## 📚 Snippet Gallery（21 个，按用途分组）
 
@@ -58,9 +58,9 @@ Batch 13-17 演化教训：纯文本 Philosophy + 18 项 checklist 让 sub-agent
 | `color-legend.tex` | 底部 N 色 legend strip | ![color-legend](previews/color-legend.png) |
 | `summary-bar.tex` | 底部 pipeline summary bar | ![summary-bar](previews/summary-bar.png) |
 
-### 6. 🏆 完整 Figure 范例（GOLD STANDARD — sub-agent 复制后改 content）
+### 6. 🏆 完整 Figure 范例（GOLD STANDARD — agent / sub-agent 复制后改 content）
 
-**Batch 19 用户反馈**：snippets 单个完美但**组合时仍有重叠/排版问题**。原因：sub-agent 复制 snippet 后自己定位坐标。这 6 个范例提供**完整 figure.tex 骨架**（含精确 zone 位置、所有 element 都 bounded 在 zone 内），sub-agent **复制整文件后只改 content** = 零位置 bug。
+**Batch 19 用户反馈**：snippets 单个完美但**组合时仍有重叠/排版问题**。原因：agent / sub-agent 复制 snippet 后自己定位坐标。这 6 个范例提供**完整 figure.tex 骨架**（含精确 zone 位置、所有 element 都 bounded 在 zone 内），agent / sub-agent **复制整文件后只改 content** = 零位置 bug。
 
 **Batch 20 用户复审**：原 2 个范例（B/C）已生效（1 round 收敛 + 0 位置 bug）。**新增 4 个 GOLD STANDARD 范例**（D/E/F/G），都从用户历史质量最高的产物直接复制改造而来。
 
@@ -81,7 +81,7 @@ Batch 13-17 演化教训：纯文本 Philosophy + 18 项 checklist 让 sub-agent
 - **bar chart 用 hard-code `\foreach \i/\name/\val`**——避免 idx 累加 bug
 - **所有 content 显式 inside zone rect**——不超出 zone
 
-**Sub-agent 使用流程**：
+**Agent / sub-agent 使用流程**：
 1. 选骨架 B（pipeline 类）或 C（hero + panels 类）
 2. 复制对应 example.tex 为 `figure.tex`
 3. 改 title + zone titles + box labels + 数字 + 公式
