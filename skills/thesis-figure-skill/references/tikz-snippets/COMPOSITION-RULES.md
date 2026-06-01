@@ -1,7 +1,7 @@
 # Snippet 组合规则
 
 > **何时读**：复杂档准备拼装 ≥ 3 个 snippet 时必读。
-> **核心**：snippet 解决"局部质量"，组合规则解决"全局组合"。Batch 17 fig153 v3 教训：sub-agent 把 snippets 都塞进去了，但 snippets 之间的留白、对齐、Z-order 没规划 = 整图仍乱。
+> **核心**：snippet 解决"局部质量"，组合规则解决"全局组合"。Batch 17 fig153 v3 教训：agent / sub-agent 把 snippets 都塞进去了，但 snippets 之间的留白、对齐、Z-order 没规划 = 整图仍乱。
 
 ## 1. 三种推荐整图骨架（选一个）
 

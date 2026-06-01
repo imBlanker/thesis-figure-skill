@@ -2,9 +2,9 @@
 
 **中文 | [English](README.en.md)**
 
-> Claude Skill：粘贴论文文案或上传图片，自动生成学术级配图（LaTeX/TikZ + draw.io）
+> Claude / Codex Skill：粘贴论文文案或上传图片，自动生成学术级配图（LaTeX/TikZ + draw.io）
 
-一个用于 [Claude](https://claude.ai) 的 Skill，让 AI 自动将学术论文文案转化为高质量配图。支持两种输出格式：
+一个同时适用于 [Claude](https://claude.ai) 与 OpenAI Codex 的 Skill，让 AI 自动将学术论文文案转化为高质量配图。支持两种输出格式：
 
 - **LaTeX/TikZ**：适合系统架构图、数据流图、几何示意图等结构化图表，可直接嵌入论文
 - **draw.io XML**：适合技术路线图、科研展示图、学术汇报配图等装饰性强的图表，支持渐变色、阴影、自由布局
@@ -58,23 +58,49 @@
 
 ## 安装
 
-### 方法一：命令行安装（推荐）
+### 方法一：Claude 命令行安装（推荐）
 
 ```bash
 npx skills add 0xE1337/thesis-figure-skill
 ```
 
-### 方法二：上传安装
+### 方法二：Codex 安装
+
+本仓库已按 Codex Skill 目录结构提供 `skills/thesis-figure-skill/SKILL.md` 与 `references/`，可直接复制到 Codex 的 skills 目录：
+
+```bash
+CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
+mkdir -p "$CODEX_SKILLS_DIR"
+cp -R skills/thesis-figure-skill "$CODEX_SKILLS_DIR/"
+```
+
+若 `CODEX_HOME` 未设置，通常可使用 `~/.codex/skills/` 作为目标目录。安装后，在 Codex 会话中点名 `thesis-figure-skill` 或直接提出论文配图需求即可触发。
+
+### 方法三：Claude 上传安装
 
 下载 [`thesis-figure-skill.skill`](thesis-figure-skill.skill) 文件，在 Claude 对话中上传，点击 **"Copy to your skills"** 即可。
 
-### 方法三：手动安装
+维护者如需重新生成 `.skill` 上传包，请运行：
 
-将 `skills/thesis-figure-skill/` 整个目录（包含 `SKILL.md` 和 `references/` 子目录）复制到 Claude 的 skills 目录下。
+```bash
+python3 scripts/package_skill.py --output /tmp/thesis-figure-skill.skill
+```
+
+为避免 PR 系统提示 “Binary files are not supported”，普通文档/源码 PR 不应提交重新生成的 `.skill` 二进制归档；发布时再从源码目录生成上传包。
+
+### 方法四：手动安装
+
+将 `skills/thesis-figure-skill/` 整个目录（包含 `SKILL.md` 和 `references/` 子目录）复制到 Claude 或 Codex 的 skills 目录下。
+
+## Codex compatibility
+
+- The skill directory is already Codex-compatible: `skills/thesis-figure-skill/SKILL.md` is the entry point, `agents/openai.yaml` provides Codex UI metadata, and all auxiliary material lives under `references/`.
+- In Codex, read referenced files directly from `references/` when the workflow says to load a specialized rule or script. Do not assume Claude-only helpers; use the local shell for validators, packaging checks, and optional compilation.
+- If Codex sub-agents are unavailable or not explicitly requested, perform the same review steps in the main agent and record the findings in the final response.
 
 ## 使用方式
 
-安装后，在 Claude 对话中直接说：
+安装后，在 Claude 或 Codex 对话中直接说：
 
 ```
 帮我根据以下论文内容画一张架构图：
@@ -99,7 +125,7 @@ npx skills add 0xE1337/thesis-figure-skill
 
 > **提示**：首次运行时需要安装字体和 TeX 编译环境，耗时较长，请耐心等待。后续使用会直接复用已创建的环境。
 
-Claude 会自动：
+Claude / Codex 会自动：
 1. 识别论文领域
 2. 选择合适的输出格式（TikZ / draw.io）
 3. 生成详细画图指令
@@ -173,7 +199,7 @@ Claude 会自动：
 
 ## 环境要求
 
-本 Skill 在 Claude Code 中运行，自动处理编译环境。如需本地编译 TikZ 示例：
+本 Skill 可在 Claude Code 或 Codex 中运行，并会按环境能力处理编译验证。如需本地编译 TikZ 示例：
 
 - TeX Live（含 `xelatex`）
 - CJK 中文字体（macOS 自带 PingFang SC，Linux 需安装 Noto Sans CJK SC，Windows 使用 SimHei）

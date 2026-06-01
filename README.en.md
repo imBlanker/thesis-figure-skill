@@ -2,9 +2,9 @@
 
 **[中文](README.md) | English**
 
-> Claude Skill: Paste thesis text or upload images, automatically generate publication-quality figures (LaTeX/TikZ + draw.io)
+> Claude / Codex Skill: Paste thesis text or upload images, automatically generate publication-quality figures (LaTeX/TikZ + draw.io)
 
-A Skill for [Claude](https://claude.ai) that lets AI automatically transform academic paper text into high-quality figures. Supports two output formats:
+A Skill for both [Claude](https://claude.ai) and OpenAI Codex that lets AI automatically transform academic paper text into high-quality figures. Supports two output formats:
 
 - **LaTeX/TikZ**: Ideal for system architecture diagrams, data flow diagrams, geometric illustrations, and other structured charts that can be directly embedded in papers
 - **draw.io XML**: Ideal for research roadmaps, academic presentations, and decorative-rich diagrams with gradient colors, shadows, and free-form layouts
@@ -58,23 +58,49 @@ A Skill for [Claude](https://claude.ai) that lets AI automatically transform aca
 
 ## Installation
 
-### Method 1: Command Line (Recommended)
+### Method 1: Claude Command Line (Recommended)
 
 ```bash
 npx skills add 0xE1337/thesis-figure-skill
 ```
 
-### Method 2: Upload
+### Method 2: Codex Installation
+
+This repository already includes the Codex Skill-compatible directory layout: `skills/thesis-figure-skill/SKILL.md` plus `references/`. Copy it directly into the Codex skills directory:
+
+```bash
+CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
+mkdir -p "$CODEX_SKILLS_DIR"
+cp -R skills/thesis-figure-skill "$CODEX_SKILLS_DIR/"
+```
+
+If `CODEX_HOME` is not set, `~/.codex/skills/` is the typical target directory. After installation, mention `thesis-figure-skill` in a Codex session or simply ask for an academic figure to trigger the skill.
+
+### Method 3: Claude Upload
 
 Download the [`thesis-figure-skill.skill`](thesis-figure-skill.skill) file, upload it in a Claude conversation, and click **"Copy to your skills"**.
 
-### Method 3: Manual
+Maintainers can regenerate the `.skill` upload package with:
 
-Copy the entire `skills/thesis-figure-skill/` directory (including `SKILL.md` and `references/` subdirectory) into Claude's skills directory.
+```bash
+python3 scripts/package_skill.py --output /tmp/thesis-figure-skill.skill
+```
+
+To avoid PR systems warning that “Binary files are not supported”, regular documentation/source PRs should not commit regenerated `.skill` binary archives; build the upload package from the source directory at release time instead.
+
+### Method 4: Manual
+
+Copy the entire `skills/thesis-figure-skill/` directory (including `SKILL.md` and `references/` subdirectory) into Claude's or Codex's skills directory.
+
+## Codex compatibility
+
+- The skill directory is already Codex-compatible: `skills/thesis-figure-skill/SKILL.md` is the entry point, `agents/openai.yaml` provides Codex UI metadata, and all auxiliary material lives under `references/`.
+- In Codex, read referenced files directly from `references/` when the workflow says to load a specialized rule or script. Do not assume Claude-only helpers; use the local shell for validators, packaging checks, and optional compilation.
+- If Codex sub-agents are unavailable or not explicitly requested, perform the same review steps in the main agent and record the findings in the final response.
 
 ## Usage
 
-After installation, simply say in a Claude conversation:
+After installation, simply say in a Claude or Codex conversation:
 
 ```
 Draw an architecture diagram based on the following thesis content:
@@ -100,7 +126,7 @@ Draw a research roadmap in draw.io format
 
 > **Note**: The first run requires installing fonts and the TeX compilation environment, which takes longer. Subsequent runs will reuse the previously created environment.
 
-Claude will automatically:
+Claude / Codex will automatically:
 1. Identify the paper's field
 2. Select the appropriate output format (TikZ / draw.io)
 3. Generate detailed drawing instructions
@@ -174,7 +200,7 @@ Automatically selected based on the paper's field:
 
 ## Requirements
 
-This Skill runs within Claude Code and automatically handles the compilation environment. For local compilation of TikZ examples:
+This Skill can run within Claude Code or Codex and handles compilation checks according to the available environment. For local compilation of TikZ examples:
 
 - TeX Live (with `xelatex`)
 - CJK Chinese fonts (macOS includes PingFang SC, Linux requires Noto Sans CJK SC, Windows uses SimHei)

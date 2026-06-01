@@ -1,0 +1,4 @@
+interface:
+  display_name: "Thesis Figure Skill"
+  short_description: "Create academic TikZ and draw.io figures"
+  default_prompt: "Use $thesis-figure-skill to turn this paper section into a publication-ready TikZ architecture figure."
