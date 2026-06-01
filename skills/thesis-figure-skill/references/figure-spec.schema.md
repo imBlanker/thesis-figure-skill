@@ -1,6 +1,6 @@
 # figure-spec.json — 结构化图自动布局规范
 
-> **B 路（dot-to-tikz）入口**。Claude 只输出本规范的 JSON spec，**不写任何坐标**。
+> **B 路（dot-to-tikz）入口**。agent 只输出本规范的 JSON spec，**不写任何坐标**。
 > `references/dot-to-tikz.py` 调用 graphviz 算位置，套学术配色模板生成 .tex。
 > 适用：架构图 / 流水线 / DAG / 分层 / 三栏映射等纯结构化图。
 > **不适用**：含嵌入热力图/曲线/柱状的富视觉图——走 A 路（vision feedback）。
